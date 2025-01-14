@@ -1,0 +1,48 @@
+# fly.toml app configuration file generated for apes-on-ape-bot on 2025-01-14T00:28:53-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'apes-on-ape-bot'
+primary_region = 'phx'
+kill_signal = "SIGINT"
+kill_timeout = "5s"
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  max_machines_running = 1
+  processes = ['app']
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "1s"
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '256MB'
+  cpu_kind = 'shared'
+  cpus = 1

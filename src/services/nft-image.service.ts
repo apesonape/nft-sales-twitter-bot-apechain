@@ -8,9 +8,11 @@ export class NFTImageService extends BaseService {
   private cache = new Map<string, string>(); // Cache image URLs
 
   private readonly IPFS_GATEWAYS = [
-    'https://cloudflare-ipfs.com/ipfs/',
     'https://nftstorage.link/ipfs/',
+    'https://cloudflare-ipfs.com/ipfs/',
     'https://ipfs.io/ipfs/',
+    'https://gateway.pinata.cloud/ipfs/',
+    'https://dweb.link/ipfs/'
   ];
 
   constructor() {
@@ -21,21 +23,34 @@ export class NFTImageService extends BaseService {
   }
 
   private async resolveIPFSUrl(ipfsUrl: string): Promise<string> {
-    const hash = ipfsUrl.replace('ipfs://', '');
+    const hash = ipfsUrl.replace('ipfs://', '').replace('/ipfs/', '');
     
+    // Try each gateway in sequence
     for (const gateway of this.IPFS_GATEWAYS) {
       try {
         const url = `${gateway}${hash}`;
-        const response = await fetch(url, { method: 'HEAD' });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(url, { 
+          method: 'HEAD',
+          signal: controller.signal 
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (response.ok) {
+          console.log(`Successfully resolved IPFS URL using gateway: ${gateway}`);
           return url;
         }
       } catch (e) {
+        console.log(`Gateway ${gateway} failed, trying next...`);
         continue;
       }
     }
     
-    // Fall back to first gateway if none respond
+    // If all gateways fail, use the first one
+    console.log(`All gateways failed, falling back to first gateway`);
     return `${this.IPFS_GATEWAYS[0]}${hash}`;
   }
 

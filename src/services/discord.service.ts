@@ -172,7 +172,19 @@ export class DiscordService extends BaseService implements OnModuleInit {
       console.log('\nSending to Discord:', messageData.message);
       
       const validImageUrls = messageData.imageUrls.filter(url => url !== null);
-      const files = validImageUrls.map(url => ({ attachment: url }));
+      const files = validImageUrls.map(url => {
+        // Check if URL already has an extension
+        const hasExtension = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+        if (hasExtension) {
+          return { attachment: url }; // Keep original URL if it has an extension
+        }
+        
+        // Default to .jpg if no extension (can be adjusted based on content-type if needed)
+        return { 
+          attachment: url,
+          name: 'nft-image.jpg'
+        };
+      });
 
       for (const [channelName, channel] of this.channels) {
         console.log(`Sending message to channel: ${channelName}`);

@@ -55,13 +55,13 @@ export const config = {
 
   // Tweet filter configuration
   tweetFilters: {
-    enabled: true,  // Master switch for tweet filtering
-    minBulkPurchaseCount: 3,  // Minimum number of NFTs in a single transaction to tweet about
+    enabled: false,  // Disable filtering to allow all tweets
+    minBulkPurchaseCount: 1,  // Allow any bulk purchase size
     minSingleSalePrice: {
-      ape: "100",   // Minimum price in APE for single sales
-      wape: "100"   // Minimum price in WAPE for single sales
+      ape: "0",    // No minimum price for APE sales
+      wape: "0"    // No minimum price for WAPE sales
     },
-    skipBulkWapeSales: true,  // Skip tweeting about bulk WAPE sales
+    skipBulkWapeSales: false,  // Allow bulk WAPE sales
   },
   
   // Enable for detailed logging

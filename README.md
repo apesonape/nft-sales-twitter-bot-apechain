@@ -7,7 +7,6 @@ A Discord and Twitter bot that monitors and announces Apes on Ape NFT sales from
 - Monitors Magic Eden marketplace for Apes on Ape sales
 - Posts sale announcements to Discord with NFT images
 - Optional Twitter integration for sale announcements
-- Configurable filters for Twitter posts
 - Support for both single and bulk sales
 - Handles both APE and WAPE sales
 
@@ -33,8 +32,12 @@ A Discord and Twitter bot that monitors and announces Apes on Ape NFT sales from
 ### Twitter Setup (Optional)
 1. Create a Twitter Developer account
 2. Create a Project and App
-3. Generate API keys and access tokens
-4. Add the credentials to your `.env` file
+3. Generate API keys
+4. Run the auth script to get access tokens:
+   ```bash
+   npx ts-node src/generate-auth.ts
+   ```
+5. Add the credentials to your `.env` file
 
 ## Configuration
 
@@ -49,17 +52,6 @@ token_id_offset: 1,  // Offset for token IDs if needed
 ```
 
 ### Message Templates
-```typescript
-discord: {
-  templates: {
-    saleMessage: '...',      // Single APE sale template
-    wapeSaleMessage: '...',  // Single WAPE sale template
-    bulkSaleMessage: '...',  // Bulk APE sale template
-    bulkWapeSaleMessage: '...' // Bulk WAPE sale template
-  }
-}
-```
-
 Available template variables:
 - `{tokenId}`: NFT token ID
 - `{price}`: Sale price
@@ -70,19 +62,6 @@ Available template variables:
 - `{avgPrice}`: Average price per NFT in bulk sale
 - `{txUrl}`: Transaction URL
 
-### Tweet Filters
-```typescript
-tweetFilters: {
-  enabled: true,  // Enable/disable filtering
-  minBulkPurchaseCount: 2,  // Minimum NFTs for bulk sale tweets
-  minSingleSalePrice: {
-    ape: "100",   // Minimum price for single APE sales
-    wape: "100"   // Minimum price for single WAPE sales
-  },
-  skipBulkWapeSales: true,  // Skip tweeting bulk WAPE sales
-}
-```
-
 ## Development
 
 Run the bot locally:
@@ -92,20 +71,44 @@ npm run dev
 
 ## Deployment
 
-### Using Render
+### Using Fly.io
 
-1. Push your code to GitHub
-2. Create a new Web Service on Render
-3. Connect your GitHub repository
-4. Configure as a Docker service
-5. Add your environment variables in Render's dashboard
-6. Deploy!
+1. Install the Fly.io CLI:
+   ```bash
+   # On Windows PowerShell:
+   iwr https://fly.io/install.ps1 -useb | iex
+   ```
+
+2. Sign up and login:
+   ```bash
+   fly auth signup
+   # or if you already have an account:
+   fly auth login
+   ```
+
+3. Launch your app:
+   ```bash
+   fly launch
+   ```
+
+4. Set your environment variables:
+   ```bash
+   # Required:
+   fly secrets set RPC_URL="your-value" DISCORD_TOKEN="your-value" DISCORD_CHANNEL_ID="your-value" DISCORD_ANNOUNCEMENTS_ID="your-value"
+
+   # Optional (Twitter):
+   fly secrets set TWITTER_API_KEY="your-value" TWITTER_API_SECRET="your-value" TWITTER_ACCESS_TOKEN="your-value" TWITTER_ACCESS_SECRET="your-value"
+   ```
+
+5. Deploy:
+   ```bash
+   fly deploy
+   ```
 
 ### Environment Variables
 
 Required:
 - `RPC_URL`: Apechain RPC URL
-- `MAGIC_EDEN_MARKETPLACE_ADDRESS`: Magic Eden's marketplace contract address
 - `DISCORD_TOKEN`: Your Discord bot token
 - `DISCORD_CHANNEL_ID`: Main channel ID for announcements
 - `DISCORD_ANNOUNCEMENTS_ID`: Secondary channel ID for announcements
