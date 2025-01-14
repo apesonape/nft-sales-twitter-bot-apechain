@@ -40,10 +40,10 @@ export const config = {
     ],
     // Default templates used if channel doesn't specify its own
     templates: {
-      saleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ Apes on Ape #{tokenId} bought for {price} APE on {marketplace}```\n⇨ [View on Magic Eden]({itemUrl})',
-      wapeSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace}```\n⇨ [View on Magic Eden]({itemUrl})',
-      bulkSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ {count} Apes on Ape bought for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE)```\n⇨ [View on Apescan]({txUrl})',
-      bulkWapeSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE)```\n⇨ [View on Apescan]({txUrl})'
+      saleMessage: '```css\n✅ Purchase Alert: 🚀 Apes on Ape #{tokenId} acquired for {price} APE on {marketplace}\n```\n🔗 [View on Magic Eden]({itemUrl})',
+      wapeSaleMessage: '```css\n✅ Sale Alert: 📉 Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace}\n```\n🔗 [View on Magic Eden]({itemUrl})',
+      bulkSaleMessage: '```css\n✅ Bulk Purchase Alert: 📈 {count} Apes on Ape acquired for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE)\n```\n🔗 [View on Apescan]({txUrl})',
+      bulkWapeSaleMessage: '```css\n✅ Bulk Sale Alert: 📉 {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE)\n```\n🔗 [View on Apescan]({txUrl})'
     }
   },
   twitter: {
