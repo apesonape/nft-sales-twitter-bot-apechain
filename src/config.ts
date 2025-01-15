@@ -38,12 +38,52 @@ export const config = {
         name: 'announcements'
       }
     ],
+
     // Default templates used if channel doesn't specify its own
     templates: {
-      saleMessage: '```css\n✅ Purchase Alert: 🚀 Apes on Ape #{tokenId} acquired for {price} APE on {marketplace}\n```\n🔗 [View on Magic Eden]({itemUrl})',
-      wapeSaleMessage: '```css\n✅ Sale Alert: 📉 Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace}\n```\n🔗 [View on Magic Eden]({itemUrl})',
-      bulkSaleMessage: '```css\n✅ Bulk Purchase Alert: 📈 {count} Apes on Ape acquired for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE)\n```\n🔗 [View on Apescan]({txUrl})',
-      bulkWapeSaleMessage: '```css\n✅ Bulk Sale Alert: 📉 {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE)\n```\n🔗 [View on Apescan]({txUrl})'
+      // Template for a single NFT purchase alert
+      saleMessage: 
+        `\`\`\`css
+        🚨🚨 **BUY ALERT** 🚨🚨
+        
+        ╔════════════════════════════════════════════════════════════════╗
+        ║ Apes on Ape #{tokenId} bought for {price} APE on {marketplace} ║
+        ╚════════════════════════════════════════════════════════════════╝
+        \`\`\`
+        🔗 [View on Magic Eden]({itemUrl})`,
+    
+      // Template for a single NFT sale alert
+      wapeSaleMessage: 
+        `\`\`\`css
+        🚨🚨 **SALE ALERT** 🚨🚨
+        
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║ Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} ║
+        ╚═══════════════════════════════════════════════════════════════╝
+        \`\`\`
+        🔗 [View on Magic Eden]({itemUrl})`,
+    
+      // Template for bulk NFT purchase alert
+      bulkSaleMessage: 
+        `\`\`\`css
+        🚨🚨 **SWEEP ALERT** 🚨🚨
+        
+        ╔════════════════════════════════════════════════════════════════════════════════════════╗
+        ║ {count} Apes on Ape bought for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE) ║
+        ╚════════════════════════════════════════════════════════════════════════════════════════╝
+        \`\`\`
+        🔗 [View on Apescan]({txUrl})`,
+    
+      // Template for bulk NFT sale alert
+      bulkWapeSaleMessage: 
+        `\`\`\`css
+        🚨🚨 **BULK SALE ALERT** 🚨🚨
+        
+        ╔════════════════════════════════════════════════════════════════════════════════════════╗
+        ║ {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE) ║
+        ╚════════════════════════════════════════════════════════════════════════════════════════╝
+        \`\`\`
+        🔗 [View on Apescan]({txUrl})`
     }
   },
   twitter: {
