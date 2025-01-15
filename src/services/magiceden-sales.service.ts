@@ -180,9 +180,14 @@ export class MagicEdenSalesService extends BaseService {
 
         // Replace trait placeholders if available
         if (nftTraits?.formattedTraits) {
-          const platform = templates === this.config.discord.templates ? 'discord' : 'twitter';
-          const placement = this.config.traits[platform].placement;
-          return baseMessage.replace(placement, nftTraits.formattedTraits[platform]);
+          if (templates === this.config.discord.templates) {
+            // For Discord, use the configured placement
+            const placement = this.config.traits.discord.placement;
+            return baseMessage.replace(placement, nftTraits.formattedTraits.discord);
+          } else {
+            // For Twitter, replace {traits} directly
+            return baseMessage.replace('{traits}', nftTraits.formattedTraits.twitter);
+          }
         }
 
         return baseMessage;
