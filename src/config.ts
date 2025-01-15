@@ -73,8 +73,8 @@ export const config = {
     }
   },
   twitter: {
-    saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍{traits}\n\n{itemUrl}',
-    wapeSaleMessage: 'Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} 🦍{traits}\n\n{itemUrl}',
+    saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍 {traits}\n\n{itemUrl}',
+    wapeSaleMessage: 'Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} 🦍 {traits}\n\n{itemUrl}',
     bulkSaleMessage: '{count} Apes on Ape bought for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE) 🦍\n\n{txUrl}',
     bulkWapeSaleMessage: '{count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE) 🦍\n\n{txUrl}'
   },
