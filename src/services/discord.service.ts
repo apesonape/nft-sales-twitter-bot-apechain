@@ -183,7 +183,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
       messageType = categorizeMessageType(saleData);
 
       let embed;
-      const { tokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = saleData;
+      const { displayTokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = saleData;
 
       let nftImg = saleData.imageUrls[0];
 
@@ -196,10 +196,10 @@ export class DiscordService extends BaseService implements OnModuleInit {
       // Create the appropriate embed based on the message type
       switch (messageType) {
         case MessageType.Buy:
-          embed = createBuyMessage(tokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
+          embed = createBuyMessage(displayTokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
           break;
         case MessageType.Sale:
-          embed = createSaleMessage(tokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
+          embed = createSaleMessage(displayTokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
           break;
         case MessageType.BulkBuy:
           embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl, nftImg);
