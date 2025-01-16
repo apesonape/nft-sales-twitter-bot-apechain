@@ -118,38 +118,27 @@ function createBulkBuyMessage(
   txUrl: string,
   imgUrl: string
 ) {
+
+  const totalPriceNum = parseFloat(totalPrice);
+  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
+
    // Values to replace in the description
    const values = {
     count: count.toString(),
     totalPrice,
     marketplace,
-    txUrl
+    txUrl,
+    avgPrice: avgPrice.toFixed(2)
   };
 
   // Get the description with replaced values
   const description = replacePlaceholders(config.discord.bulkBuyMessage.description, values);
 
-  const totalPriceNum = parseFloat(totalPrice);
-  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
-
-  // Dynamic Sale Details
-  const saleDetailsValues = {
-    count: count.toString(),
-    totalPrice,
-    avgPrice: avgPrice.toFixed(2)
-  };
-
-  // Get dynamic sale details using placeholders
-  const saleDetails = replacePlaceholders(config.discord.bulkBuyMessage.saleDetails, saleDetailsValues);
-
   return new EmbedBuilder()
     .setColor(config.discord.bulkBuyMessage.color as ColorResolvable)
     .setTitle(config.discord.bulkBuyMessage.title)
     .setDescription(description)
-    .setImage(imgUrl)   
-    .addFields(
-      { name: '🛒 Sweep Details', value: saleDetails }
-    )
+    .setImage(imgUrl)  
     .setURL(txUrl)
     .setTimestamp()
     .setFooter({
@@ -174,38 +163,27 @@ function createBulkSaleMessage(
   txUrl: string,
   imgUrl: string
 ) {
+  
+  const totalPriceNum = parseFloat(totalPrice);
+  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
+
    // Values to replace in the description
    const values = {
     count: count.toString(),
     totalPrice,
     marketplace,
-    txUrl
+    txUrl,
+    avgPrice: avgPrice.toFixed(2)
   };
 
   // Get the description with replaced values
   const description = replacePlaceholders(config.discord.bulkSaleMessage.description, values);
-
-  const totalPriceNum = parseFloat(totalPrice);
-  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
-
-  // Dynamic Sale Details
-  const saleDetailsValues = {
-    count: count.toString(),
-    totalPrice,
-    avgPrice: avgPrice.toFixed(2)
-  };
-
-  // Get dynamic sale details using placeholders
-  const saleDetails = replacePlaceholders(config.discord.bulkSaleMessage.saleDetails, saleDetailsValues);
 
   return new EmbedBuilder()
     .setColor(config.discord.bulkSaleMessage.color as ColorResolvable)
     .setTitle(config.discord.bulkSaleMessage.title)
     .setDescription(description)
     .setImage(imgUrl)
-    .addFields(
-      { name: '🛒 Sale Details', value: saleDetails }
-    )
     .setURL(txUrl)
     .setTimestamp()
     .setFooter({

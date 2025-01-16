@@ -1,5 +1,5 @@
 export const config = {
-  contract_address: '0xa6babe18f2318d2880dd7da3126c19536048f8b0',
+  contract_address: '0x02fe8b663a136089fff7fefc0247d6564ff118a3',
   contract_deployment_block: 7832296,
   collection_name: 'Apechain',
   token_id_offset: 1,
@@ -77,13 +77,11 @@ export const config = {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
       description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<{txUrl}>)',
-      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
       color: '#FFC107',
       title: '🚨 **BULK SALE ALERT!** 🚨',
       description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<{txUrl}>)',
-      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
     footerText: 'Apechain - Apes on Ape NFT Bot',
   },
