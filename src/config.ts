@@ -1,5 +1,5 @@
 export const config = {
-  contract_address: '0x75e7b64aa70f8266843d6c90aa396c99c27b98eb',
+  contract_address: '0xe8f0635591190fb626f9d13c49b60626561ed145',
   contract_deployment_block: 7832296,
   collection_name: 'Apechain',
   token_id_offset: 1,
@@ -66,26 +66,26 @@ export const config = {
     buyMessage: {
       color: '#0054FA',
       title: '🚨 **BUY ALERT!** 🚨',
-      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<${itemUrl}>)',
+      description: '🎉 **Apes on Ape #{tokenId}** has been snagged for **{price} APE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
     },
     saleMessage: {
       color: '#E74C3C',
       title: '🚨 **SALE ALERT!** 🚨',
-      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<${itemUrl}>)',
+      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
     },
     bulkBuyMessage: {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
-      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<${txUrl}>)',
+      description: '🛒 **{count} Apes on Ape NFTs** purchased for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<https://{txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
       color: '#FFC107',
       title: '🚨 **BULK SALE ALERT!** 🚨',
-      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<${txUrl}>)',
+      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<https://{txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
-    footerText: 'Apechain - Apes on Ape NFT Bot'
+    footerText: 'Apechain - Apes on Ape NFT Bot',
   },
   
   twitter: {
