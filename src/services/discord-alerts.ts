@@ -1,6 +1,9 @@
-import { EmbedBuilder } from 'discord.js';
+import { ColorResolvable, EmbedBuilder } from 'discord.js';
 import { config } from '../config';
-const SHOW_TRAITS = config.traits.enabled; // Extract the `enabled` flag from the traits config
+
+const SHOW_TRAITS = config.traits.enabled;  // Extract the `enabled` flag from the traits config
+const COLLECTION_NAME = config.collection_name;  // Get the collection name from config
+const FOOTER_TEXT = config.discord.footerText;  // Centralized footer text
 
 /**
  * Creates a Discord embed message for a single purchase of an "Apes on Ape" NFT.
@@ -21,24 +24,23 @@ function createBuyMessage(
   imgUrl: string,
   traits: string
 ) {
-
   return new EmbedBuilder()
-    .setColor('#0054FA') // Set a consistent blue color for the embed
-    .setTitle('🚨 **BUY ALERT!** 🚨')
+    .setColor(config.discord.buyMessage.color as ColorResolvable)
+    .setTitle(config.discord.buyMessage.title)
     .setDescription(
-      `🎉 **Apes on Ape #${tokenId}** has been snagged for **${price} APE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
+      `🎉 **${COLLECTION_NAME} #${tokenId}** has been snagged for **${price} APE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
     )
-    .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
+    .setImage(imgUrl)
     .addFields(
-      { name: '🛒 Marketplace', value: marketplace, inline: true },
-      { name: '💰 Price', value: `${price} APE`, inline: true },
-      { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
+      // { name: '🛒 Marketplace', value: marketplace, inline: true },
+      // { name: '💰 Price', value: `${price} APE`, inline: true },
+      // { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
       ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
-    ) 
-    .setURL(itemUrl) // Link to the purchased item
-    .setTimestamp() // Add the timestamp for when the message was created
+    )
+    .setURL(itemUrl)
+    .setTimestamp()
     .setFooter({
-      text: 'Apechain - Apes on Ape NFT Bot'
+      text: FOOTER_TEXT
     });
 }
 
@@ -53,32 +55,31 @@ function createBuyMessage(
  * @returns The Discord embed message for the sale.
  */
 function createSaleMessage(
-    tokenId: string,
-    price: string,
-    marketplace: string,
-    itemUrl: string,
-    imgUrl: string,
-    traits: string
+  tokenId: string,
+  price: string,
+  marketplace: string,
+  itemUrl: string,
+  imgUrl: string,
+  traits: string
 ) {
-
   return new EmbedBuilder()
-  .setColor('#E74C3C') // Red color for sale alert
-  .setTitle('🚨 **SALE ALERT!** 🚨')
-  .setDescription(
-    `🔥 **Apes on Ape #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
-  )
-  .setImage(imgUrl) // Add the NFT image
-  .addFields(
-    { name: '🛒 Marketplace', value: marketplace, inline: true },
-    { name: '💰 Price', value: `${price} WAPE`, inline: true },
-    { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
-    ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
-  )
-  .setURL(itemUrl) // Set the link to the item
-  .setTimestamp() // Add timestamp
-  .setFooter({
-    text: 'Apechain - Apes on Ape NFT Bot'
-  });
+    .setColor(config.discord.saleMessage.color as ColorResolvable)
+    .setTitle(config.discord.saleMessage.title)
+    .setDescription(
+      `🔥 **${COLLECTION_NAME} #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
+    )
+    .setImage(imgUrl)
+    .addFields(
+      // { name: '🛒 Marketplace', value: marketplace, inline: true },
+      // { name: '💰 Price', value: `${price} WAPE`, inline: true },
+      // { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
+      ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
+    )
+    .setURL(itemUrl)
+    .setTimestamp()
+    .setFooter({
+      text: FOOTER_TEXT
+    });
 }
 
 /**
@@ -88,6 +89,7 @@ function createSaleMessage(
  * @param totalPrice The total price paid for the NFTs in APE.
  * @param marketplace The marketplace where the NFTs were purchased.
  * @param txUrl The URL to the transaction on the blockchain.
+ * @param imgUrl The image of the NFT.
  * @returns The Discord embed message for the bulk purchase.
  */
 function createBulkBuyMessage(
@@ -95,26 +97,26 @@ function createBulkBuyMessage(
   totalPrice: string,
   marketplace: string,
   txUrl: string,
-  imgUrl
+  imgUrl: string
 ) {
-  const totalPriceNum = parseFloat(totalPrice);  // Convert totalPrice string to number
-  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;  // Calculate the average price per NFT
+  const totalPriceNum = parseFloat(totalPrice);
+  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
 
   return new EmbedBuilder()
-  .setColor('#28A745') // Green color for bulk buy alert
-  .setTitle('🚨 **SWEEP ALERT!** 🚨')
-  .setDescription(
-    `✨ **${count} Apes on Ape NFTs** have been swept for **${totalPrice} APE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
-  )
-  .setImage(imgUrl)
-  .addFields(
-    { name: '🛒 Sweep Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} APE\n- **Avg Price:** ${avgPrice.toFixed(2)} APE` }
-  )
-  .setURL(txUrl) // Transaction link
-  .setTimestamp()
-  .setFooter({
-    text: 'Apechain - Apes on Ape NFT Bot'
-  });
+    .setColor(config.discord.bulkBuyMessage.color as ColorResolvable)
+    .setTitle(config.discord.bulkBuyMessage.title)
+    .setDescription(
+      `✨ **${count} ${COLLECTION_NAME} NFTs** have been swept for **${totalPrice} APE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
+    )
+    .setImage(imgUrl)
+    .addFields(
+      { name: '🛒 Sweep Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} APE\n- **Avg Price:** ${avgPrice.toFixed(2)} APE` }
+    )
+    .setURL(txUrl)
+    .setTimestamp()
+    .setFooter({
+      text: FOOTER_TEXT
+    });
 }
 
 /**
@@ -124,6 +126,7 @@ function createBulkBuyMessage(
  * @param totalPrice The total price received for the NFTs in WAPE.
  * @param marketplace The marketplace where the NFTs were sold.
  * @param txUrl The URL to the transaction on the blockchain.
+ * @param imgUrl The image of the NFT
  * @returns The Discord embed message for the bulk sale.
  */
 function createBulkSaleMessage(
@@ -137,21 +140,20 @@ function createBulkSaleMessage(
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
 
   return new EmbedBuilder()
-  .setColor('#FFC107') // Yellow color for bulk sale alert
-  .setTitle('🚨 **BULK SALE ALERT!** 🚨')
-  .setDescription(
-    `💸 **${count} Apes on Ape NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
-  )
-  .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
-  .addFields(
-    { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
-  ) 
-  .setURL(txUrl) // Transaction link
-  .setTimestamp()
-  .setFooter({
-    text: 'Apechain - Apes on Ape NFT Bot',
-  });
+    .setColor(config.discord.bulkSaleMessage.color as ColorResolvable)
+    .setTitle(config.discord.bulkSaleMessage.title)
+    .setDescription(
+      `💸 **${count} ${COLLECTION_NAME} NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
+    )
+    .setImage(imgUrl)
+    .addFields(
+      { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
+    )
+    .setURL(txUrl)
+    .setTimestamp()
+    .setFooter({
+      text: FOOTER_TEXT
+    });
 }
-  
 // Export the functions so they can be used elsewhere in the application
 export { createSaleMessage, createBuyMessage, createBulkBuyMessage, createBulkSaleMessage };

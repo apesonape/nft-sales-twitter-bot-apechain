@@ -62,7 +62,24 @@ export const config = {
         id: process.env.DISCORD_ANNOUNCEMENTS_ID,
         name: 'announcements'
       }
-    ]
+    ],
+    buyMessage: {
+      color: '#0054FA',
+      title: '🚨 **BUY ALERT!** 🚨',
+    },
+    saleMessage: {
+      color: '#E74C3C',
+      title: '🚨 **SALE ALERT!** 🚨',
+    },
+    bulkBuyMessage: {
+      color: '#28A745',
+      title: '🚨 **SWEEP ALERT!** 🚨',
+    },
+    bulkSaleMessage: {
+      color: '#FFC107',
+      title: '🚨 **BULK SALE ALERT!** 🚨',
+    },
+    footerText: 'Apechain - Apes on Ape NFT Bot',
   },
   
   twitter: {
