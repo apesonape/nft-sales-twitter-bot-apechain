@@ -187,8 +187,6 @@ export class DiscordService extends BaseService implements OnModuleInit {
 
       let nftImg = saleData.imageUrls[0];
       const formattedTraits = formatTraits(traits); // Use the helper method for traits
-      console.log(traits + "<- formatted traits ");
-      console.log(formattedTraits + "<- formatted traits ");
 
       // Create the appropriate embed based on the message type
       switch (messageType) {

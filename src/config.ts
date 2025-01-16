@@ -66,20 +66,25 @@ export const config = {
     buyMessage: {
       color: '#0054FA',
       title: '🚨 **BUY ALERT!** 🚨',
+      description: '🚨 A new {tokenId} was bought for {price} APE on {marketplace}. View the item [here]({itemUrl}).',
     },
     saleMessage: {
       color: '#E74C3C',
       title: '🚨 **SALE ALERT!** 🚨',
+      description: '🚨 {tokenId} was sold for {price} WAPE on {marketplace}. View the item [here]({itemUrl}).',
     },
     bulkBuyMessage: {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
+      description: '{count} NFTs bought for {totalPrice} APE in a bulk purchase! View transaction details [here]({txUrl}).',
+      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
       color: '#FFC107',
       title: '🚨 **BULK SALE ALERT!** 🚨',
+      description: '{count} NFTs sold for {totalPrice} WAPE in a bulk sale! View transaction details [here]({txUrl}).',
+      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
-    footerText: 'Apechain - Apes on Ape NFT Bot',
   },
   
   twitter: {

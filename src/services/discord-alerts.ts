@@ -12,6 +12,7 @@ const FOOTER_TEXT = config.discord.footerText;  // Centralized footer text
  * @param price The price of the NFT in APE.
  * @param marketplace The marketplace where the NFT was bought.
  * @param itemUrl The URL to the item's page.
+ * @param imgUrl The image of the NFT.
  * @param traits The traits of the NFT.
  * 
  * @returns The Discord embed message for the purchase.
@@ -24,17 +25,23 @@ function createBuyMessage(
   imgUrl: string,
   traits: string
 ) {
+   // Values to replace in the description
+   const values = {
+    tokenId,
+    price,
+    marketplace,
+    itemUrl
+  };
+
+  // Get the description with replaced values
+  const description = replacePlaceholders(config.discord.buyMessage.description, values);
+
   return new EmbedBuilder()
     .setColor(config.discord.buyMessage.color as ColorResolvable)
     .setTitle(config.discord.buyMessage.title)
-    .setDescription(
-      `🎉 **${COLLECTION_NAME} #${tokenId}** has been snagged for **${price} APE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
-    )
+    .setDescription(description)
     .setImage(imgUrl)
     .addFields(
-      // { name: '🛒 Marketplace', value: marketplace, inline: true },
-      // { name: '💰 Price', value: `${price} APE`, inline: true },
-      // { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
       ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
     )
     .setURL(itemUrl)
@@ -51,6 +58,7 @@ function createBuyMessage(
  * @param price The price of the NFT in WAPE.
  * @param marketplace The marketplace where the NFT was sold.
  * @param itemUrl The URL to the item's page.
+ * @param imgUrl The image of the NFT.
  * @param traits The traits of the NFT.
  * @returns The Discord embed message for the sale.
  */
@@ -62,17 +70,23 @@ function createSaleMessage(
   imgUrl: string,
   traits: string
 ) {
+   // Values to replace in the description
+   const values = {
+    tokenId,
+    price,
+    marketplace,
+    itemUrl
+  };
+
+  // Get the description with replaced values
+  const description = replacePlaceholders(config.discord.saleMessage.description, values);
+
   return new EmbedBuilder()
     .setColor(config.discord.saleMessage.color as ColorResolvable)
     .setTitle(config.discord.saleMessage.title)
-    .setDescription(
-      `🔥 **${COLLECTION_NAME} #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
-    )
+    .setDescription(description)
     .setImage(imgUrl)
     .addFields(
-      // { name: '🛒 Marketplace', value: marketplace, inline: true },
-      // { name: '💰 Price', value: `${price} WAPE`, inline: true },
-      // { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
       ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
     )
     .setURL(itemUrl)
@@ -99,18 +113,37 @@ function createBulkBuyMessage(
   txUrl: string,
   imgUrl: string
 ) {
+   // Values to replace in the description
+   const values = {
+    count: count.toString(),
+    totalPrice,
+    marketplace,
+    txUrl
+  };
+
+  // Get the description with replaced values
+  const description = replacePlaceholders(config.discord.bulkBuyMessage.description, values);
+
   const totalPriceNum = parseFloat(totalPrice);
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
+
+  // Dynamic Sale Details
+  const saleDetailsValues = {
+    count: count.toString(),
+    totalPrice,
+    avgPrice: avgPrice.toFixed(2)
+  };
+
+  // Get dynamic sale details using placeholders
+  const saleDetails = replacePlaceholders(config.discord.bulkBuyMessage.saleDetails, saleDetailsValues);
 
   return new EmbedBuilder()
     .setColor(config.discord.bulkBuyMessage.color as ColorResolvable)
     .setTitle(config.discord.bulkBuyMessage.title)
-    .setDescription(
-      `✨ **${count} ${COLLECTION_NAME} NFTs** have been swept for **${totalPrice} APE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
-    )
+    .setDescription(description)
     .setImage(imgUrl)
     .addFields(
-      { name: '🛒 Sweep Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} APE\n- **Avg Price:** ${avgPrice.toFixed(2)} APE` }
+      { name: '🛒 Sweep Details', value: saleDetails }
     )
     .setURL(txUrl)
     .setTimestamp()
@@ -126,7 +159,7 @@ function createBulkBuyMessage(
  * @param totalPrice The total price received for the NFTs in WAPE.
  * @param marketplace The marketplace where the NFTs were sold.
  * @param txUrl The URL to the transaction on the blockchain.
- * @param imgUrl The image of the NFT
+ * @param imgUrl The image of the NFT.
  * @returns The Discord embed message for the bulk sale.
  */
 function createBulkSaleMessage(
@@ -136,18 +169,37 @@ function createBulkSaleMessage(
   txUrl: string,
   imgUrl: string
 ) {
+   // Values to replace in the description
+   const values = {
+    count: count.toString(),
+    totalPrice,
+    marketplace,
+    txUrl
+  };
+
+  // Get the description with replaced values
+  const description = replacePlaceholders(config.discord.bulkSaleMessage.description, values);
+
   const totalPriceNum = parseFloat(totalPrice);
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
+
+  // Dynamic Sale Details
+  const saleDetailsValues = {
+    count: count.toString(),
+    totalPrice,
+    avgPrice: avgPrice.toFixed(2)
+  };
+
+  // Get dynamic sale details using placeholders
+  const saleDetails = replacePlaceholders(config.discord.bulkSaleMessage.saleDetails, saleDetailsValues);
 
   return new EmbedBuilder()
     .setColor(config.discord.bulkSaleMessage.color as ColorResolvable)
     .setTitle(config.discord.bulkSaleMessage.title)
-    .setDescription(
-      `💸 **${count} ${COLLECTION_NAME} NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
-    )
+    .setDescription(description)
     .setImage(imgUrl)
     .addFields(
-      { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
+      { name: '🛒 Sale Details', value: saleDetails }
     )
     .setURL(txUrl)
     .setTimestamp()
@@ -155,5 +207,24 @@ function createBulkSaleMessage(
       text: FOOTER_TEXT
     });
 }
+
+/**
+ * Replace placeholders in the description with actual values.
+ * @param {string} template - The template string containing placeholders.
+ * @param {object} values - An object containing values to replace the placeholders.
+ * @returns {string} - The description with placeholders replaced by actual values.
+ */
+function replacePlaceholders(template: string, values: { [key: string]: string }): string {
+  let result = template;
+  
+  // Iterate over all values and replace placeholders in the template
+  for (const [key, value] of Object.entries(values)) {
+    const placeholder = `{${key}}`;
+    result = result.replace(new RegExp(placeholder, 'g'), value);
+  }
+  
+  return result;
+}
+
 // Export the functions so they can be used elsewhere in the application
 export { createSaleMessage, createBuyMessage, createBulkBuyMessage, createBulkSaleMessage };
