@@ -1,5 +1,5 @@
 export const config = {
-  contract_address: '0x02fe8b663a136089fff7fefc0247d6564ff118a3',
+  contract_address: '0xa6babe18f2318d2880dd7da3126c19536048f8b0',
   contract_deployment_block: 7832296,
   collection_name: 'Apechain',
   token_id_offset: 1,
