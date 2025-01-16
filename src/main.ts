@@ -6,6 +6,9 @@ import { AppModule } from './app.module';
 import { MagicEdenSalesService } from './services/magiceden-sales.service';
 import { DiscordService } from './services/discord.service';
 import { TwitterService } from './services/twitter.service';
+import { DiscordMessageData } from './types/discord.types';
+import { MessageType } from './types/message-types';
+import { categorizeMessageType } from './utils/message-utils';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -43,11 +46,19 @@ async function bootstrap() {
 
   // Listen for sale events and send to Discord and Twitter
   salesService.on('sale', async (saleData) => {
-    // Always send to Discord
-    await discordService.sendMessage({
+
+    let messageType: MessageType;
+    messageType = categorizeMessageType(saleData);
+
+    const discordMessageData: DiscordMessageData = {
+      type: messageType,
       message: saleData.discordMessage,
-      imageUrls: saleData.imageUrls
-    });
+      imageUrls: saleData.imageUrls,
+      saleData: saleData, // Include txUrl for bulk sales
+    };
+
+    // Always send to Discord
+    await discordService.sendMessage(discordMessageData);
 
     // Conditionally send to Twitter based on filters
     await twitterService.postTweet(saleData);

@@ -176,10 +176,8 @@ export class MagicEdenSalesService extends BaseService {
               .replace('{itemUrl}', itemUrl);
       };
 
-      const discordMessage = createMessage(this.config.discord.templates);
       const twitterMessage = createMessage(this.config.twitter);
 
-      const message = discordMessage;
       if (this.config.debug_mode) {
         console.log('Processing sale:', {
           tokenId: saleData.tokenId,
@@ -221,14 +219,12 @@ export class MagicEdenSalesService extends BaseService {
         itemUrl,
         txUrl,
         imageUrls,
-        message,
-        discordMessage,
         twitterMessage,
         transferCount: saleData.transferCount
       } as SaleData);
 
       if (this.config.debug_mode) {
-        console.log(`Sale processed: ${message}`);
+        console.log(`Sale processed: ${twitterMessage}`);
       }
     } catch (error) {
       console.error('Error processing sale:', error);

@@ -1,3 +1,5 @@
+// sale.types.ts
+
 export interface SaleData {
   tokenId: string;
   displayTokenId: string;
@@ -13,13 +15,6 @@ export interface SaleData {
   itemUrl: string;
   txUrl: string;
   imageUrls: string[];
-  message: string;
-  discordMessage: string;
   twitterMessage: string;
   transferCount: number;
 }
-
-export interface DiscordMessageData {
-  message: string;
-  imageUrls: string[];
-} 

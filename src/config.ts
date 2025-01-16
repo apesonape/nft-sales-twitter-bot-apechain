@@ -30,62 +30,15 @@ export const config = {
     channels: [
       {
         id: process.env.DISCORD_CHANNEL_ID,  // Main channel
-        name: 'main',
-        // Use default templates
+        name: 'main'
       },
       {
         id: process.env.DISCORD_ANNOUNCEMENTS_ID,
         name: 'announcements'
       }
-    ],
-
-    // Default templates used if channel doesn't specify its own
-    templates: {
-      // Template for a single NFT purchase alert
-      saleMessage: 
-        `\`\`\`css
-        🚨🚨 **BUY ALERT** 🚨🚨
-        
-        ╔════════════════════════════════════════════════════════════════╗
-        ║ Apes on Ape #{tokenId} bought for {price} APE on {marketplace} ║
-        ╚════════════════════════════════════════════════════════════════╝
-        \`\`\`
-        🔗 [View on Magic Eden]({itemUrl})`,
-    
-      // Template for a single NFT sale alert
-      wapeSaleMessage: 
-        `\`\`\`css
-        🚨🚨 **SALE ALERT** 🚨🚨
-        
-        ╔═══════════════════════════════════════════════════════════════╗
-        ║ Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} ║
-        ╚═══════════════════════════════════════════════════════════════╝
-        \`\`\`
-        🔗 [View on Magic Eden]({itemUrl})`,
-    
-      // Template for bulk NFT purchase alert
-      bulkSaleMessage: 
-        `\`\`\`css
-        🚨🚨 **SWEEP ALERT** 🚨🚨
-        
-        ╔════════════════════════════════════════════════════════════════════════════════════════╗
-        ║ {count} Apes on Ape bought for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE) ║
-        ╚════════════════════════════════════════════════════════════════════════════════════════╝
-        \`\`\`
-        🔗 [View on Apescan]({txUrl})`,
-    
-      // Template for bulk NFT sale alert
-      bulkWapeSaleMessage: 
-        `\`\`\`css
-        🚨🚨 **BULK SALE ALERT** 🚨🚨
-        
-        ╔════════════════════════════════════════════════════════════════════════════════════════╗
-        ║ {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE) ║
-        ╚════════════════════════════════════════════════════════════════════════════════════════╝
-        \`\`\`
-        🔗 [View on Apescan]({txUrl})`
-    }
+    ]
   },
+  
   twitter: {
     saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍\n\n{itemUrl}',
     wapeSaleMessage: 'Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} 🦍\n\n{itemUrl}',

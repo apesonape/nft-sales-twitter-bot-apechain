@@ -1,28 +1,18 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { BaseService } from './base.service';
-import { Client, GatewayIntentBits, TextChannel, BaseGuildTextChannel, GuildTextBasedChannel } from 'discord.js';
-import { DiscordMessageData } from '../types/sale.types';
-
-// Define interfaces for our config types
-interface ChannelTemplates {
-  saleMessage?: string;
-  wapeSaleMessage?: string;
-  bulkSaleMessage?: string;
-  bulkWapeSaleMessage?: string;
-}
-
-interface ChannelConfig {
-  id: string;
-  name: string;
-  templates?: ChannelTemplates;
-}
+import { Client, GatewayIntentBits, GuildTextBasedChannel } from 'discord.js';
+import { DiscordMessageData } from 'src/types/discord.types';
+import { createSaleMessage, createBulkBuyMessage, createBuyMessage, createBulkSaleMessage } from './alerts';
 
 @Injectable()
 export class DiscordService extends BaseService implements OnModuleInit {
-  private client: Client;
-  private channels: Map<string, GuildTextBasedChannel> = new Map();
-  private ready = false;
+  private client: Client; // Discord client instance
+  private channels: Map<string, GuildTextBasedChannel> = new Map(); // Map of channel names to channel objects
+  private ready = false; // Flag to check if the Discord client is ready
 
+  /**
+   * Constructor initializes the Discord client and sets up event listeners for reconnect and disconnect events.
+   */
   constructor() {
     super();
     console.log('Discord service constructor called');
@@ -53,26 +43,37 @@ export class DiscordService extends BaseService implements OnModuleInit {
     });
   }
 
+  /**
+   * Attempts to reconnect the Discord client if disconnected.
+   */
   private async reconnect() {
     try {
       if (!this.client.isReady()) {
         console.log('Attempting to reconnect Discord client...');
-        await this.client.login(process.env.DISCORD_TOKEN);
-        await this.initializeChannels();
+        await this.client.login(process.env.DISCORD_TOKEN); // Reattempt login
+        await this.initializeChannels(); // Reinitialize channels
         this.ready = true;
         console.log('Discord client successfully reconnected');
       }
     } catch (error) {
       console.error('Error reconnecting Discord client:', error);
-      // Try again in 5 seconds
+      // Retry after 5 seconds
       setTimeout(() => this.reconnect(), 5000);
     }
   }
 
+  /**
+   * Returns the current readiness status of the Discord client.
+   * @returns true if the client is ready, false otherwise.
+   */
   isReady(): boolean {
     return this.ready;
   }
 
+  /**
+   * Initializes the Discord service by logging in the client and setting up channels.
+   * This method is called when the module is initialized.
+   */
   async onModuleInit() {
     console.log('Discord service initializing...');
     try {
@@ -103,7 +104,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
         this.emit('error', error);
       });
 
-      await this.client.login(token);
+      await this.client.login(token); // Login to Discord with the token
       console.log('Discord login successful');
     } catch (error) {
       console.error('Error initializing Discord service:', error);
@@ -111,6 +112,10 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
   }
 
+  /**
+   * Initializes the Discord channels based on the configuration in the environment variables.
+   * This method fetches each channel and stores it in a map for later use.
+   */
   private async initializeChannels() {
     console.log('Initializing Discord channels...');
     try {
@@ -120,6 +125,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
       
       console.log('Discord channels config:', this.config.discord.channels);
       
+      // Iterate over all configured channels
       for (const channelConfig of this.config.discord.channels) {
         if (!channelConfig.id) {
           console.error(`Missing channel ID for channel: ${channelConfig.name}`);
@@ -132,7 +138,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
           
           if (channel) {
             console.log(`Channel fetched successfully: ${channel.name} (${channel.id})`);
-            this.channels.set(channelConfig.name, channel);
+            this.channels.set(channelConfig.name, channel); // Store the channel in the map
             console.log(`Successfully connected to channel: ${channelConfig.name} (${channel.name})`);
             console.log(`Current channels in Map: ${Array.from(this.channels.keys()).join(', ')}`);
           } else {
@@ -153,10 +159,12 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
   }
 
-  private getMessageTemplate(channelConfig: ChannelConfig, templateName: string): string {
-    return channelConfig.templates?.[templateName] || this.config.discord.templates[templateName];
-  }
-
+  /**
+   * Sends a message to the configured Discord channels based on the provided message data.
+   * It handles different message types (buy, sale, bulkBuy, bulkSale) and includes embedded messages with relevant details.
+   * 
+   * @param messageData The data required to generate the message to be sent.
+   */
   async sendMessage(messageData: DiscordMessageData) {
     if (!this.ready) {
       console.log('Skipping Discord message - client not ready, attempting to reconnect...');
@@ -168,9 +176,31 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
 
     try {
-      // Log the message content
-      console.log('\nSending to Discord:', messageData.message);
-      
+      let embed;
+      const { tokenId, price, marketplace, buyer, seller, itemUrl, count, totalPrice, txUrl } = messageData.saleData;
+    
+      // Create the appropriate embed based on the message type
+      switch (messageData.type) {
+        case 'buy':
+          embed = createBuyMessage(tokenId, price, marketplace, buyer, seller, itemUrl);
+          break;
+        case 'sale':
+          embed = createSaleMessage(tokenId, price, marketplace, buyer, seller, itemUrl);
+          break;
+        case 'bulkBuy':
+          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl);
+          break;
+        case 'bulkSale':
+          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl);
+          break;
+        default:
+          console.error('Unknown message type:', messageData.type);
+          return;
+      }
+
+      console.log('\nSending to Discord:', embed);
+
+      // Filter and map image URLs to ensure valid URLs and attachment names
       const validImageUrls = messageData.imageUrls.filter(url => url !== null);
       const files = validImageUrls.map(url => {
         // Check if URL already has an extension
@@ -186,10 +216,11 @@ export class DiscordService extends BaseService implements OnModuleInit {
         };
       });
 
+      // Iterate over all configured channels and send the message
       for (const [channelName, channel] of this.channels) {
         console.log(`Sending message to channel: ${channelName}`);
         await channel.send({
-          content: messageData.message,
+          embeds: [embed], 
           files
         });
         console.log(`Successfully sent message to channel: ${channelName}`);
@@ -203,4 +234,4 @@ export class DiscordService extends BaseService implements OnModuleInit {
       }
     }
   }
-} 
+}
