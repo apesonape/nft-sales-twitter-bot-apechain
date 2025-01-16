@@ -66,27 +66,27 @@ export const config = {
     buyMessage: {
       color: '#0054FA',
       title: '🚨 **BUY ALERT!** 🚨',
-      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
+      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<{itemUrl}>)',
     },
     saleMessage: {
       color: '#E74C3C',
       title: '🚨 **SALE ALERT!** 🚨',
-      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
+      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<{itemUrl}>)',
     },
     bulkBuyMessage: {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
-      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<https://{txUrl}>)',
+      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<{txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
       color: '#FFC107',
       title: '🚨 **BULK SALE ALERT!** 🚨',
-      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<https://{txUrl}>)',
+      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<{txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
     footerText: 'Apechain - Apes on Ape NFT Bot',
-    
+  },
   
   twitter: {
     saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍 {traits}\n\n{itemUrl}',
