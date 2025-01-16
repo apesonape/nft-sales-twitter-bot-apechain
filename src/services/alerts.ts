@@ -6,39 +6,39 @@ import { EmbedBuilder } from 'discord.js';
  * @param tokenId The ID of the NFT that was bought.
  * @param price The price of the NFT in APE.
  * @param marketplace The marketplace where the NFT was bought.
- * @param buyer The buyer's address.
- * @param seller The seller's address.
  * @param itemUrl The URL to the item's page.
  * @param traits The traits of the NFT.
+ * 
  * @returns The Discord embed message for the purchase.
  */
 function createBuyMessage(
   tokenId: string,
   price: string,
   marketplace: string,
-  buyer: string,
-  seller: string,
   itemUrl: string,
-  traits: Array<{ trait_type: string, value: string | number }> // Assuming traits is an array
+  imgUrl: string,
+  traits: Array<{ trait_type: string, value: string | number }>
 ) {
-  // Format traits into a clean list or string
-  const formattedTraits = traits
-    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
-    .join('\n'); // Join with newlines for readability
+  const formattedTraits = formatTraits(traits); // Use the helper method for traits
 
   return new EmbedBuilder()
-    .setColor('#3498db') // Set the embed color (blue for buy alert)
-    .setTitle('🚨🚨 BUY ALERT 🚨🚨') // Set the title of the embed
-    .setDescription(`**Apes on Ape #${tokenId}** has been purchased for **${price} APE** on **${marketplace}**!`) // Set the description with purchase details
-    .addFields(
-      { name: '🛒 Transaction Details:', value: `- **Token ID:** ${tokenId}\n- **Collection:** Apes on Ape` }, // Add field for transaction details
-      { name: 'Buyer:', value: `[${buyer}](https://apescan.io/address/${buyer})`, inline: true }, // Add buyer field with clickable address link
-      { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true }, // Add seller field with clickable address link
-      { name: 'Traits:', value: formattedTraits || 'No traits available' } // Add formatted traits field
+    .setColor('#3498db') // Set a consistent blue color for the embed
+    .setTitle('🚨 **BUY ALERT!** 🚨')
+    .setDescription(
+      `🎉 **Apes on Ape #${tokenId}** has been snagged for **${price} APE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
     )
-    .setURL(itemUrl) // Set the item URL for easy access to the NFT
-    .setTimestamp() // Add a timestamp to the embed
-    .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
+    .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
+    .addFields(
+      { name: '🛒 Marketplace', value: marketplace, inline: true },
+      { name: '💰 Price', value: `${price} APE`, inline: true },
+      { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
+      { name: '🎨 Traits', value: formattedTraits || 'No traits available', inline: false }
+    ) 
+    .setURL(itemUrl) // Link to the purchased item
+    .setTimestamp() // Add the timestamp for when the message was created
+    .setFooter({
+      text: 'Apechain - Apes on Ape NFT Bot'
+    });
 }
 
 
@@ -48,8 +48,6 @@ function createBuyMessage(
  * @param tokenId The ID of the NFT that was sold.
  * @param price The price of the NFT in WAPE.
  * @param marketplace The marketplace where the NFT was sold.
- * @param buyer The buyer's address.
- * @param seller The seller's address.
  * @param itemUrl The URL to the item's page.
  * @param traits The traits of the NFT.
  * @returns The Discord embed message for the sale.
@@ -58,30 +56,32 @@ function createSaleMessage(
     tokenId: string,
     price: string,
     marketplace: string,
-    buyer: string,
-    seller: string,
     itemUrl: string,
+    imgUrl: string,
     traits: Array<{ trait_type: string, value: string | number }> // Assuming traits is an array
 ) {
     // Format traits into a clean list or string
-    const formattedTraits = traits
-        .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
-        .join('\n'); // Join with newlines for readability
+    const formattedTraits = formatTraits(traits)
 
     return new EmbedBuilder()
-        .setColor('#e74c3c') // Set the embed color (red for sale alert)
-        .setTitle('🚨🚨 SALE ALERT 🚨🚨') // Set the title of the embed
-        .setDescription(`**Apes on Ape #${tokenId}** has been sold for **${price} WAPE** on **${marketplace}**!`) // Set the description with sale details
-        .addFields(
-        { name: '🛒 Transaction Details:', value: `- **Token ID:** ${tokenId}\n- **Collection:** Apes on Ape` }, // Add field for transaction details
-        { name: 'Buyer:', value: `[${buyer}](https://apescan.io/address/${buyer})`, inline: true }, // Add buyer field with clickable address link
-        { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true }, // Add seller field with clickable address link
-        { name: 'Traits:', value: formattedTraits || 'No traits available' } // Add formatted traits field
-        )
-        .setURL(itemUrl) // Set the item URL for easy access to the NFT
-        .setTimestamp() // Add a timestamp to the embed
-        .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
-}
+    .setColor('#e74c3c') // Red color for sale alert
+    .setTitle('🚨 **SALE ALERT!** 🚨')
+    .setDescription(
+      `🔥 **Apes on Ape #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
+    )
+    .setImage(imgUrl) // Add the NFT image
+    .addFields(
+      { name: '🛒 Marketplace', value: marketplace, inline: true },
+      { name: '💰 Price', value: `${price} WAPE`, inline: true },
+      { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
+      { name: '🎨 Traits', value: formattedTraits || 'No traits available', inline: false }
+    )
+    .setURL(itemUrl) // Set the link to the item
+    .setTimestamp() // Add timestamp
+    .setFooter({
+      text: 'Apechain - Apes on Ape NFT Bot'
+    });
+  }
 
 /**
  * Creates a Discord embed message for a bulk purchase (sweep) of multiple "Apes on Ape" NFTs.
@@ -96,21 +96,27 @@ function createBulkBuyMessage(
   count: number,
   totalPrice: string,
   marketplace: string,
-  txUrl: string
+  txUrl: string,
+  imgUrl
 ) {
   const totalPriceNum = parseFloat(totalPrice);  // Convert totalPrice string to number
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;  // Calculate the average price per NFT
 
   return new EmbedBuilder()
-    .setColor('#f1c40f') // Set the embed color (yellow for bulk buy alert)
-    .setTitle('🚨🚨 SWEEP ALERT 🚨🚨') // Set the title of the embed
-    .setDescription(`**${count} Apes on Ape** have been purchased for **${totalPrice} APE** on **${marketplace}**!`) // Set the description with purchase details
-    .addFields(
-      { name: '🛒 Transaction Details:', value: `- **Total Count:** ${count}\n- **Total Price:** ${totalPrice} APE\n- **Average Price:** ${avgPrice.toFixed(2)} APE` } // Add transaction details including average price
-    )
-    .setURL(txUrl) // Set the transaction URL for easy access to the blockchain transaction
-    .setTimestamp() // Add a timestamp to the embed
-    .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
+  .setColor('#f1c40f') // Yellow color for bulk buy alert
+  .setTitle('🚨 **SWEEP ALERT!** 🚨')
+  .setDescription(
+    `✨ **${count} Apes on Ape NFTs** have been swept for **${totalPrice} APE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
+  )
+  .setImage(imgUrl)
+  .addFields(
+    { name: '🛒 Sweep Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} APE\n- **Avg Price:** ${avgPrice.toFixed(2)} APE` }
+  )
+  .setURL(txUrl) // Transaction link
+  .setTimestamp()
+  .setFooter({
+    text: 'Apechain - Apes on Ape NFT Bot'
+  });
 }
 
 /**
@@ -126,21 +132,35 @@ function createBulkSaleMessage(
   count: number,
   totalPrice: string,
   marketplace: string,
-  txUrl: string
+  txUrl: string,
+  imgUrl: string
 ) {
-  const totalPriceNum = parseFloat(totalPrice);  // Convert totalPrice string to number
-  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;  // Calculate the average price per NFT
+  const totalPriceNum = parseFloat(totalPrice);
+  const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
 
   return new EmbedBuilder()
-    .setColor('#9b59b6') // Set the embed color (purple for bulk sale alert)
-    .setTitle('🚨🚨 BULK SALE ALERT 🚨🚨') // Set the title of the embed
-    .setDescription(`**${count} Apes on Ape** have been sold for **${totalPrice} WAPE** on **${marketplace}**!`) // Set the description with sale details
-    .addFields(
-      { name: '🛒 Transaction Details:', value: `- **Total Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Average Price:** ${avgPrice.toFixed(2)} WAPE` } // Add transaction details including average price
+    .setColor('#9b59b6') // Purple color for bulk sale alert
+    .setTitle('🚨 **BULK SALE ALERT!** 🚨')
+    .setDescription(
+      `💸 **${count} Apes on Ape NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
     )
-    .setURL(txUrl) // Set the transaction URL for easy access to the blockchain transaction
-    .setTimestamp() // Add a timestamp to the embed
-    .setFooter({ text: 'Apechain - Apes on Ape NFT Bot', iconURL: process.env.ICON_URL }); // Set footer with an icon URL
+    .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
+    .addFields(
+      { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
+    ) 
+    .setURL(txUrl) // Transaction link
+    .setTimestamp()
+    .setFooter({
+      text: 'Apechain - Apes on Ape NFT Bot',
+    });
+}
+  
+
+function formatTraits(traits: Array<{ trait_type: string, value: string | number }>): string {
+  return traits
+    .filter(trait => trait.trait_type.toLowerCase() !== 'background') // Exclude 'Background' trait
+    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
+    .join('\n'); // Join with newlines for readability
 }
 
 // Export the functions so they can be used elsewhere in the application

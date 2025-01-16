@@ -177,21 +177,21 @@ export class DiscordService extends BaseService implements OnModuleInit {
 
     try {
       let embed;
-      const { tokenId, price, marketplace, buyer, seller, itemUrl, count, totalPrice, txUrl, traits } = messageData.saleData;
+      const { tokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = messageData.saleData;
 
       // Create the appropriate embed based on the message type
       switch (messageData.type) {
         case 'buy':
-          embed = createBuyMessage(tokenId, price, marketplace, buyer, seller, itemUrl, traits);
+          embed = createBuyMessage(tokenId, price, marketplace, itemUrl, messageData.imageUrls[0], traits);
           break;
         case 'sale':
-          embed = createSaleMessage(tokenId, price, marketplace, buyer, seller, itemUrl, traits);
+          embed = createSaleMessage(tokenId, price, marketplace, itemUrl, messageData.imageUrls[0], traits);
           break;
         case 'bulkBuy':
-          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl);
+          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl, messageData.imageUrls[0]);
           break;
         case 'bulkSale':
-          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl);
+          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl, messageData.imageUrls[0]);
           break;
         default:
           console.error('Unknown message type:', messageData.type);
@@ -200,28 +200,11 @@ export class DiscordService extends BaseService implements OnModuleInit {
 
       console.log('\nSending to Discord:', embed);
 
-      // Filter and map image URLs to ensure valid URLs and attachment names
-      const validImageUrls = messageData.imageUrls.filter(url => url !== null);
-      const files = validImageUrls.map(url => {
-        // Check if URL already has an extension
-        const hasExtension = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-        if (hasExtension) {
-          return { attachment: url }; // Keep original URL if it has an extension
-        }
-        
-        // Default to .jpg if no extension (can be adjusted based on content-type if needed)
-        return { 
-          attachment: url,
-          name: 'nft-image.jpg'
-        };
-      });
-
       // Iterate over all configured channels and send the message
       for (const [channelName, channel] of this.channels) {
         console.log(`Sending message to channel: ${channelName}`);
         await channel.send({
-          embeds: [embed], 
-          files
+          embeds: [embed]
         });
         console.log(`Successfully sent message to channel: ${channelName}`);
       }
