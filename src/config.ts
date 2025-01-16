@@ -1,5 +1,5 @@
 export const config = {
-  contract_address: '0xa6babe18f2318d2880dd7da3126c19536048f8b0',
+  contract_address: '0x75e7b64aa70f8266843d6c90aa396c99c27b98eb',
   contract_deployment_block: 7832296,
   collection_name: 'Apechain',
   token_id_offset: 1,
@@ -66,23 +66,23 @@ export const config = {
     buyMessage: {
       color: '#0054FA',
       title: '🚨 **BUY ALERT!** 🚨',
-      description: '🚨 A new {tokenId} was bought for {price} APE on {marketplace}. View the item [here]({itemUrl}).',
+      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<${itemUrl}>)',
     },
     saleMessage: {
       color: '#E74C3C',
       title: '🚨 **SALE ALERT!** 🚨',
-      description: '🚨 {tokenId} was sold for {price} WAPE on {marketplace}. View the item [here]({itemUrl}).',
+      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<${itemUrl}>)',
     },
     bulkBuyMessage: {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
-      description: '{count} NFTs bought for {totalPrice} APE in a bulk purchase! View transaction details [here]({txUrl}).',
+      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<${txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
       color: '#FFC107',
       title: '🚨 **BULK SALE ALERT!** 🚨',
-      description: '{count} NFTs sold for {totalPrice} WAPE in a bulk sale! View transaction details [here]({txUrl}).',
+      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<${txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
     footerText: 'Apechain - Apes on Ape NFT Bot'
