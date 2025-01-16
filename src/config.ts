@@ -1,5 +1,5 @@
 export const config = {
-  contract_address: '0xe8f0635591190fb626f9d13c49b60626561ed145',
+  contract_address: '0xa6babe18f2318d2880dd7da3126c19536048f8b0',
   contract_deployment_block: 7832296,
   collection_name: 'Apechain',
   token_id_offset: 1,
@@ -66,7 +66,7 @@ export const config = {
     buyMessage: {
       color: '#0054FA',
       title: '🚨 **BUY ALERT!** 🚨',
-      description: '🎉 **Apes on Ape #{tokenId}** has been snagged for **{price} APE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
+      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<https://{itemUrl}>)',
     },
     saleMessage: {
       color: '#E74C3C',
@@ -76,7 +76,7 @@ export const config = {
     bulkBuyMessage: {
       color: '#28A745',
       title: '🚨 **SWEEP ALERT!** 🚨',
-      description: '🛒 **{count} Apes on Ape NFTs** purchased for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<https://{txUrl}>)',
+      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<https://{txUrl}>)',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
     },
     bulkSaleMessage: {
@@ -86,7 +86,7 @@ export const config = {
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
     footerText: 'Apechain - Apes on Ape NFT Bot',
-  },
+    
   
   twitter: {
     saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍 {traits}\n\n{itemUrl}',
