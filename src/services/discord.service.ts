@@ -1,8 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { BaseService } from './base.service';
 import { Client, GatewayIntentBits, GuildTextBasedChannel } from 'discord.js';
-import { DiscordMessageData } from 'src/types/discord.types';
-import { createSaleMessage, createBulkBuyMessage, createBuyMessage, createBulkSaleMessage } from './alerts';
+import { createSaleMessage, createBulkBuyMessage, createBuyMessage, createBulkSaleMessage } from './discord-alerts';
+import { MessageType } from '../types/message-types';
+import { SaleData } from 'src/types/sale.types';
+import { config } from '../config';
 
 @Injectable()
 export class DiscordService extends BaseService implements OnModuleInit {
@@ -163,9 +165,9 @@ export class DiscordService extends BaseService implements OnModuleInit {
    * Sends a message to the configured Discord channels based on the provided message data.
    * It handles different message types (buy, sale, bulkBuy, bulkSale) and includes embedded messages with relevant details.
    * 
-   * @param messageData The data required to generate the message to be sent.
+   * @param saleData The data related to the sale.
    */
-  async sendMessage(messageData: DiscordMessageData) {
+  async sendMessage(saleData: SaleData) {
     if (!this.ready) {
       console.log('Skipping Discord message - client not ready, attempting to reconnect...');
       await this.reconnect();
@@ -176,25 +178,34 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
 
     try {
+      // Setting up data to create message
+      let messageType: MessageType;
+      messageType = categorizeMessageType(saleData);
+
       let embed;
-      const { tokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = messageData.saleData;
+      const { tokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = saleData;
+
+      let nftImg = saleData.imageUrls[0];
+      const formattedTraits = formatTraits(traits); // Use the helper method for traits
+      console.log(traits + "<- formatted traits ");
+      console.log(formattedTraits + "<- formatted traits ");
 
       // Create the appropriate embed based on the message type
-      switch (messageData.type) {
-        case 'buy':
-          embed = createBuyMessage(tokenId, price, marketplace, itemUrl, messageData.imageUrls[0], traits);
+      switch (messageType) {
+        case MessageType.Buy:
+          embed = createBuyMessage(tokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
           break;
-        case 'sale':
-          embed = createSaleMessage(tokenId, price, marketplace, itemUrl, messageData.imageUrls[0], traits);
+        case MessageType.Sale:
+          embed = createSaleMessage(tokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
           break;
-        case 'bulkBuy':
-          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl, messageData.imageUrls[0]);
+        case MessageType.BulkBuy:
+          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl, nftImg);
           break;
-        case 'bulkSale':
-          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl, messageData.imageUrls[0]);
+        case MessageType.BulkSale:
+          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl, nftImg);
           break;
         default:
-          console.error('Unknown message type:', messageData.type);
+          console.error('Unknown message type:', messageType);
           return;
       }
 
@@ -217,4 +228,36 @@ export class DiscordService extends BaseService implements OnModuleInit {
       }
     }
   }
+}
+
+/**
+ * Helper method to categorize the message type based on sale data.
+ * @param saleData The data related to the sale that determines the message type.
+ * @returns The appropriate message type based on the sale data.
+ */
+function categorizeMessageType(saleData: { isBulkSale: boolean, isWapeSale: boolean }): MessageType {
+  if (saleData.isBulkSale) {
+    // If it's a bulk sale, use bulkSale type
+    return saleData.isWapeSale ? MessageType.BulkSale : MessageType.BulkBuy;
+  } else {
+    // If it's not a bulk sale, check if it's a WAPE sale
+    return saleData.isWapeSale ? MessageType.Sale : MessageType.Buy;
+  }
+}
+
+/**
+ * Formats an array of trait objects into a string suitable for display.
+ * 
+ * - Filters out any trait types specified in the `excludeTraitTypes` array from the config.
+ * - Converts each trait into a formatted string of "Trait Type: Trait Value".
+ * - Joins all the formatted traits with a newline for readability.
+ * 
+ * @param traits - An array of trait objects, each containing a `trait_type` and a `value`.
+ * @returns A string with all traits formatted and joined by newlines, or an empty string if no valid traits are found.
+ */
+function formatTraits(traits: Array<{ trait_type: string, value: string | number }>): string {
+  return traits
+    .filter(trait => !config.traits.excludeTraitTypes.includes(trait.trait_type)) // Exclude traits in the excludeTraitTypes array
+    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
+    .join(config.traits.discord.separator); // Join with configured separator (defaults to newline)
 }

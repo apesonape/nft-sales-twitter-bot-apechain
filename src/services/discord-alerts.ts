@@ -1,4 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
+import { config } from '../config';
+const SHOW_TRAITS = config.traits.enabled; // Extract the `enabled` flag from the traits config
 
 /**
  * Creates a Discord embed message for a single purchase of an "Apes on Ape" NFT.
@@ -17,12 +19,11 @@ function createBuyMessage(
   marketplace: string,
   itemUrl: string,
   imgUrl: string,
-  traits: Array<{ trait_type: string, value: string | number }>
+  traits: string
 ) {
-  const formattedTraits = formatTraits(traits); // Use the helper method for traits
 
   return new EmbedBuilder()
-    .setColor('#3498db') // Set a consistent blue color for the embed
+    .setColor('#0054FA') // Set a consistent blue color for the embed
     .setTitle('🚨 **BUY ALERT!** 🚨')
     .setDescription(
       `🎉 **Apes on Ape #${tokenId}** has been snagged for **${price} APE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
@@ -32,7 +33,7 @@ function createBuyMessage(
       { name: '🛒 Marketplace', value: marketplace, inline: true },
       { name: '💰 Price', value: `${price} APE`, inline: true },
       { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
-      { name: '🎨 Traits', value: formattedTraits || 'No traits available', inline: false }
+      ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
     ) 
     .setURL(itemUrl) // Link to the purchased item
     .setTimestamp() // Add the timestamp for when the message was created
@@ -40,7 +41,6 @@ function createBuyMessage(
       text: 'Apechain - Apes on Ape NFT Bot'
     });
 }
-
 
 /**
  * Creates a Discord embed message for a single sale of an "Apes on Ape" NFT.
@@ -58,30 +58,28 @@ function createSaleMessage(
     marketplace: string,
     itemUrl: string,
     imgUrl: string,
-    traits: Array<{ trait_type: string, value: string | number }> // Assuming traits is an array
+    traits: string
 ) {
-    // Format traits into a clean list or string
-    const formattedTraits = formatTraits(traits)
 
-    return new EmbedBuilder()
-    .setColor('#e74c3c') // Red color for sale alert
-    .setTitle('🚨 **SALE ALERT!** 🚨')
-    .setDescription(
-      `🔥 **Apes on Ape #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
-    )
-    .setImage(imgUrl) // Add the NFT image
-    .addFields(
-      { name: '🛒 Marketplace', value: marketplace, inline: true },
-      { name: '💰 Price', value: `${price} WAPE`, inline: true },
-      { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
-      { name: '🎨 Traits', value: formattedTraits || 'No traits available', inline: false }
-    )
-    .setURL(itemUrl) // Set the link to the item
-    .setTimestamp() // Add timestamp
-    .setFooter({
-      text: 'Apechain - Apes on Ape NFT Bot'
-    });
-  }
+  return new EmbedBuilder()
+  .setColor('#E74C3C') // Red color for sale alert
+  .setTitle('🚨 **SALE ALERT!** 🚨')
+  .setDescription(
+    `🔥 **Apes on Ape #${tokenId}** was sold for **${price} WAPE** on **${marketplace}**!\n[View NFT](<${itemUrl}>)`
+  )
+  .setImage(imgUrl) // Add the NFT image
+  .addFields(
+    { name: '🛒 Marketplace', value: marketplace, inline: true },
+    { name: '💰 Price', value: `${price} WAPE`, inline: true },
+    { name: '🔢 Token ID', value: `#${tokenId}`, inline: true },
+    ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
+  )
+  .setURL(itemUrl) // Set the link to the item
+  .setTimestamp() // Add timestamp
+  .setFooter({
+    text: 'Apechain - Apes on Ape NFT Bot'
+  });
+}
 
 /**
  * Creates a Discord embed message for a bulk purchase (sweep) of multiple "Apes on Ape" NFTs.
@@ -103,7 +101,7 @@ function createBulkBuyMessage(
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;  // Calculate the average price per NFT
 
   return new EmbedBuilder()
-  .setColor('#f1c40f') // Yellow color for bulk buy alert
+  .setColor('#28A745') // Green color for bulk buy alert
   .setTitle('🚨 **SWEEP ALERT!** 🚨')
   .setDescription(
     `✨ **${count} Apes on Ape NFTs** have been swept for **${totalPrice} APE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
@@ -139,29 +137,21 @@ function createBulkSaleMessage(
   const avgPrice = count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / count : 0;
 
   return new EmbedBuilder()
-    .setColor('#9b59b6') // Purple color for bulk sale alert
-    .setTitle('🚨 **BULK SALE ALERT!** 🚨')
-    .setDescription(
-      `💸 **${count} Apes on Ape NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
-    )
-    .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
-    .addFields(
-      { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
-    ) 
-    .setURL(txUrl) // Transaction link
-    .setTimestamp()
-    .setFooter({
-      text: 'Apechain - Apes on Ape NFT Bot',
-    });
+  .setColor('#FFC107') // Yellow color for bulk sale alert
+  .setTitle('🚨 **BULK SALE ALERT!** 🚨')
+  .setDescription(
+    `💸 **${count} Apes on Ape NFTs** have been sold for **${totalPrice} WAPE** on **${marketplace}**!\n[View Transaction](<${txUrl}>)`
+  )
+  .setImage(imgUrl) // Add an image showcasing the NFTs or sweep
+  .addFields(
+    { name: '🛒 Sale Details', value: `- **Count:** ${count}\n- **Total Price:** ${totalPrice} WAPE\n- **Avg Price:** ${avgPrice.toFixed(2)} WAPE` }
+  ) 
+  .setURL(txUrl) // Transaction link
+  .setTimestamp()
+  .setFooter({
+    text: 'Apechain - Apes on Ape NFT Bot',
+  });
 }
   
-
-function formatTraits(traits: Array<{ trait_type: string, value: string | number }>): string {
-  return traits
-    .filter(trait => trait.trait_type.toLowerCase() !== 'background') // Exclude 'Background' trait
-    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
-    .join('\n'); // Join with newlines for readability
-}
-
 // Export the functions so they can be used elsewhere in the application
 export { createSaleMessage, createBuyMessage, createBulkBuyMessage, createBulkSaleMessage };

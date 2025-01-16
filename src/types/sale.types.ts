@@ -1,5 +1,4 @@
 // sale.types.ts
-
 export interface SaleData {
   tokenId: string;
   displayTokenId: string;

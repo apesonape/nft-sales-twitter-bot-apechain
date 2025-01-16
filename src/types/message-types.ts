@@ -1,5 +1,4 @@
 // message-types.ts
-
 export enum MessageType {
     Buy = "buy",
     Sale = "sale",
