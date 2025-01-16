@@ -85,6 +85,7 @@ export const config = {
       description: '{count} NFTs sold for {totalPrice} WAPE in a bulk sale! View transaction details [here]({txUrl}).',
       saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
     },
+    footerText: 'Apechain - Apes on Ape NFT Bot'
   },
   
   twitter: {

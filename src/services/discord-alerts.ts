@@ -2,7 +2,6 @@ import { ColorResolvable, EmbedBuilder } from 'discord.js';
 import { config } from '../config';
 
 const SHOW_TRAITS = config.traits.enabled;  // Extract the `enabled` flag from the traits config
-const COLLECTION_NAME = config.collection_name;  // Get the collection name from config
 const FOOTER_TEXT = config.discord.footerText;  // Centralized footer text
 
 /**
