@@ -177,15 +177,15 @@ export class DiscordService extends BaseService implements OnModuleInit {
 
     try {
       let embed;
-      const { tokenId, price, marketplace, buyer, seller, itemUrl, count, totalPrice, txUrl } = messageData.saleData;
-    
+      const { tokenId, price, marketplace, buyer, seller, itemUrl, count, totalPrice, txUrl, traits } = messageData.saleData;
+
       // Create the appropriate embed based on the message type
       switch (messageData.type) {
         case 'buy':
-          embed = createBuyMessage(tokenId, price, marketplace, buyer, seller, itemUrl);
+          embed = createBuyMessage(tokenId, price, marketplace, buyer, seller, itemUrl, traits);
           break;
         case 'sale':
-          embed = createSaleMessage(tokenId, price, marketplace, buyer, seller, itemUrl);
+          embed = createSaleMessage(tokenId, price, marketplace, buyer, seller, itemUrl, traits);
           break;
         case 'bulkBuy':
           embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl);

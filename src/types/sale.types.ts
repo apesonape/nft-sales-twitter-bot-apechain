@@ -17,4 +17,12 @@ export interface SaleData {
   imageUrls: string[];
   twitterMessage: string;
   transferCount: number;
+  traits?: {
+    trait_type: string;
+    value: string | number;
+  }[];
+  formattedTraits?: {
+    discord: string;
+    twitter: string;
+  };
 }

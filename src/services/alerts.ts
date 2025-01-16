@@ -9,6 +9,7 @@ import { EmbedBuilder } from 'discord.js';
  * @param buyer The buyer's address.
  * @param seller The seller's address.
  * @param itemUrl The URL to the item's page.
+ * @param traits The traits of the NFT.
  * @returns The Discord embed message for the purchase.
  */
 function createBuyMessage(
@@ -17,8 +18,14 @@ function createBuyMessage(
   marketplace: string,
   buyer: string,
   seller: string,
-  itemUrl: string
+  itemUrl: string,
+  traits: Array<{ trait_type: string, value: string | number }> // Assuming traits is an array
 ) {
+  // Format traits into a clean list or string
+  const formattedTraits = traits
+    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
+    .join('\n'); // Join with newlines for readability
+
   return new EmbedBuilder()
     .setColor('#3498db') // Set the embed color (blue for buy alert)
     .setTitle('🚨🚨 BUY ALERT 🚨🚨') // Set the title of the embed
@@ -26,12 +33,14 @@ function createBuyMessage(
     .addFields(
       { name: '🛒 Transaction Details:', value: `- **Token ID:** ${tokenId}\n- **Collection:** Apes on Ape` }, // Add field for transaction details
       { name: 'Buyer:', value: `[${buyer}](https://apescan.io/address/${buyer})`, inline: true }, // Add buyer field with clickable address link
-      { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true } // Add seller field with clickable address link
+      { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true }, // Add seller field with clickable address link
+      { name: 'Traits:', value: formattedTraits || 'No traits available' } // Add formatted traits field
     )
     .setURL(itemUrl) // Set the item URL for easy access to the NFT
     .setTimestamp() // Add a timestamp to the embed
     .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
 }
+
 
 /**
  * Creates a Discord embed message for a single sale of an "Apes on Ape" NFT.
@@ -42,28 +51,36 @@ function createBuyMessage(
  * @param buyer The buyer's address.
  * @param seller The seller's address.
  * @param itemUrl The URL to the item's page.
+ * @param traits The traits of the NFT.
  * @returns The Discord embed message for the sale.
  */
 function createSaleMessage(
-  tokenId: string,
-  price: string,
-  marketplace: string,
-  buyer: string,
-  seller: string,
-  itemUrl: string
+    tokenId: string,
+    price: string,
+    marketplace: string,
+    buyer: string,
+    seller: string,
+    itemUrl: string,
+    traits: Array<{ trait_type: string, value: string | number }> // Assuming traits is an array
 ) {
-  return new EmbedBuilder()
-    .setColor('#e74c3c') // Set the embed color (red for sale alert)
-    .setTitle('🚨🚨 SALE ALERT 🚨🚨') // Set the title of the embed
-    .setDescription(`**Apes on Ape #${tokenId}** has been sold for **${price} WAPE** on **${marketplace}**!`) // Set the description with sale details
-    .addFields(
-      { name: '🛒 Transaction Details:', value: `- **Token ID:** ${tokenId}\n- **Collection:** Apes on Ape` }, // Add field for transaction details
-      { name: 'Buyer:', value: `[${buyer}](https://apescan.io/address/${buyer})`, inline: true }, // Add buyer field with clickable address link
-      { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true } // Add seller field with clickable address link
-    )
-    .setURL(itemUrl) // Set the item URL for easy access to the NFT
-    .setTimestamp() // Add a timestamp to the embed
-    .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
+    // Format traits into a clean list or string
+    const formattedTraits = traits
+        .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
+        .join('\n'); // Join with newlines for readability
+
+    return new EmbedBuilder()
+        .setColor('#e74c3c') // Set the embed color (red for sale alert)
+        .setTitle('🚨🚨 SALE ALERT 🚨🚨') // Set the title of the embed
+        .setDescription(`**Apes on Ape #${tokenId}** has been sold for **${price} WAPE** on **${marketplace}**!`) // Set the description with sale details
+        .addFields(
+        { name: '🛒 Transaction Details:', value: `- **Token ID:** ${tokenId}\n- **Collection:** Apes on Ape` }, // Add field for transaction details
+        { name: 'Buyer:', value: `[${buyer}](https://apescan.io/address/${buyer})`, inline: true }, // Add buyer field with clickable address link
+        { name: 'Seller:', value: `[${seller}](https://apescan.io/address/${seller})`, inline: true }, // Add seller field with clickable address link
+        { name: 'Traits:', value: formattedTraits || 'No traits available' } // Add formatted traits field
+        )
+        .setURL(itemUrl) // Set the item URL for easy access to the NFT
+        .setTimestamp() // Add a timestamp to the embed
+        .setFooter({ text: 'Apechain - Apes on Ape NFT Bot'}); // Set footer for the embed
 }
 
 /**

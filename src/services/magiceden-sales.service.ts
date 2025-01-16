@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseService } from './base.service';
 import { ethers } from 'ethers';
-import { NFTImageService } from './nft-image.service';
+import { NFTMetadataService } from './nft-metadata.service';
 import { SaleData } from '../types/sale.types';
 
 @Injectable()
@@ -9,9 +9,9 @@ export class MagicEdenSalesService extends BaseService {
   private provider: ethers.providers.JsonRpcProvider;
   private ME_ADDRESSES: string[];
   private processedSales = new Set<string>();
-  private imageService: NFTImageService;
+  private metadataService: NFTMetadataService;
 
-  constructor(imageService: NFTImageService) {
+  constructor(metadataService: NFTMetadataService) {
     super();
     this.ME_ADDRESSES = this.config.marketplaces.magiceden.addresses;
     console.log('Initialized Magic Eden sales monitor');
@@ -19,7 +19,7 @@ export class MagicEdenSalesService extends BaseService {
     this.provider = new ethers.providers.JsonRpcProvider(
       process.env.RPC_URL || 'https://apechain.drpc.org'
     );
-    this.imageService = imageService;
+    this.metadataService = metadataService;
   }
 
   async initialize() {
@@ -154,15 +154,18 @@ export class MagicEdenSalesService extends BaseService {
       const txUrl = this.config.explorer.tx_url
         .replace('{txHash}', saleData.transactionHash);
 
-      // Get image URLs for the NFTs
-      const imageUrls = await this.getNFTImages(saleData);
+      // Get image URLs and traits for the NFTs
+      const [imageUrls, nftTraits] = await Promise.all([
+        this.getNFTImages(saleData),
+        this.getNFTTraits(saleData)
+      ]);
       
       // Determine if this is a WAPE sale
       const isWapeSale = saleData.transactionHash && 
         await this.isWapeSale(saleData.transactionHash);
       
       const createMessage = (templates: any) => {
-        return saleData.transferCount > 1 
+        const baseMessage = saleData.transferCount > 1 
           ? (isWapeSale ? templates.bulkWapeSaleMessage : templates.bulkSaleMessage)
               .replace('{count}', saleData.transferCount)
               .replace('{totalPrice}', saleData.totalPrice)
@@ -174,6 +177,14 @@ export class MagicEdenSalesService extends BaseService {
               .replace('{price}', saleData.price)
               .replace('{marketplace}', 'Magic Eden')
               .replace('{itemUrl}', itemUrl);
+
+        // Replace trait placeholders if available
+        if (nftTraits?.formattedTraits) {
+            // For Twitter, replace {traits} directly
+            return baseMessage.replace('{traits}', nftTraits.formattedTraits.twitter);
+        }
+
+        return baseMessage;
       };
 
       const twitterMessage = createMessage(this.config.twitter);
@@ -185,7 +196,8 @@ export class MagicEdenSalesService extends BaseService {
           marketplace: saleData.marketplace,
           txHash: saleData.transactionHash,
           isBulkSale: saleData.transferCount > 1,
-          isWapeSale
+          isWapeSale,
+          traits: nftTraits?.traits
         });
       }
 
@@ -220,7 +232,9 @@ export class MagicEdenSalesService extends BaseService {
         txUrl,
         imageUrls,
         twitterMessage,
-        transferCount: saleData.transferCount
+        transferCount: saleData.transferCount,
+        traits: nftTraits?.traits,
+        formattedTraits: nftTraits?.formattedTraits
       } as SaleData);
 
       if (this.config.debug_mode) {
@@ -228,6 +242,10 @@ export class MagicEdenSalesService extends BaseService {
       }
     } catch (error) {
       console.error('Error processing sale:', error);
+      // Remove from processed sales if there was an error
+      if (saleData.transactionHash) {
+        this.processedSales.delete(saleData.transactionHash);
+      }
     }
   }
 
@@ -280,10 +298,10 @@ export class MagicEdenSalesService extends BaseService {
         )).slice(0, 4); // Get up to 4 unique images
 
         return await Promise.all(
-          uniqueTokenIds.map(id => this.imageService.getImageUrl(this.config.contract_address, id))
+          uniqueTokenIds.map(id => this.metadataService.getImageUrl(this.config.contract_address, id))
         );
       } else {
-        const imageUrl = await this.imageService.getImageUrl(
+        const imageUrl = await this.metadataService.getImageUrl(
           this.config.contract_address, 
           saleData.tokenId
         );
@@ -292,6 +310,22 @@ export class MagicEdenSalesService extends BaseService {
     } catch (error) {
       console.error('Error getting NFT images:', error);
       return [];
+    }
+  }
+
+  private async getNFTTraits(saleData: any) {
+    try {
+      // Only fetch traits for single sales, not bulk sales
+      if (!saleData.transferCount || saleData.transferCount === 1) {
+        return await this.metadataService.getTraits(
+          this.config.contract_address,
+          saleData.tokenId
+        );
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting NFT traits:', error);
+      return null;
     }
   }
 } 
