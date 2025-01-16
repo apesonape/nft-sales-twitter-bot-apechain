@@ -186,7 +186,12 @@ export class DiscordService extends BaseService implements OnModuleInit {
       const { tokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = saleData;
 
       let nftImg = saleData.imageUrls[0];
-      const formattedTraits = formatTraits(traits); // Use the helper method for traits
+
+      // Conditionally calculate formattedTraits only for Buy and Sale messages
+      let formattedTraits = '';
+      if (messageType === MessageType.Buy || messageType === MessageType.Sale) {
+        formattedTraits = formatTraits(traits); // Use the helper method for traits
+      }
 
       // Create the appropriate embed based on the message type
       switch (messageType) {
@@ -254,6 +259,13 @@ function categorizeMessageType(saleData: { isBulkSale: boolean, isWapeSale: bool
  * @returns A string with all traits formatted and joined by newlines, or an empty string if no valid traits are found.
  */
 function formatTraits(traits: Array<{ trait_type: string, value: string | number }>): string {
+  console.log('Received traits:', traits); // Log the received traits for debugging
+
+  if (!Array.isArray(traits)) {
+    console.error('Traits are not an array or are undefined:', traits);
+    return '';
+  }
+
   return traits
     .filter(trait => !config.traits.excludeTraitTypes.includes(trait.trait_type)) // Exclude traits in the excludeTraitTypes array
     .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
