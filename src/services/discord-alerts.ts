@@ -41,6 +41,9 @@ function createBuyMessage(
     .setDescription(description)
     .setImage(imgUrl)
     .addFields(
+      // { name: '🛒 Marketplace', value: marketplace, inline: true },
+      // { name: '💰 Price', value: ${price} APE, inline: true },
+      // { name: '🔢 Token ID', value: #${tokenId}, inline: true },
       ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
     )
     .setURL(itemUrl)
@@ -86,6 +89,9 @@ function createSaleMessage(
     .setDescription(description)
     .setImage(imgUrl)
     .addFields(
+      // { name: '🛒 Marketplace', value: marketplace, inline: true },
+      // { name: '💰 Price', value: ${price} APE, inline: true },
+      // { name: '🔢 Token ID', value: #${tokenId}, inline: true },
       ...(SHOW_TRAITS ? [{ name: '🎨 Traits', value: traits || 'No traits available', inline: false }] : [])
     )
     .setURL(itemUrl)
@@ -140,7 +146,7 @@ function createBulkBuyMessage(
     .setColor(config.discord.bulkBuyMessage.color as ColorResolvable)
     .setTitle(config.discord.bulkBuyMessage.title)
     .setDescription(description)
-    .setImage(imgUrl)
+    .setImage(imgUrl)   
     .addFields(
       { name: '🛒 Sweep Details', value: saleDetails }
     )
