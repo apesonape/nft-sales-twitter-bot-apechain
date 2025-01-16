@@ -56,22 +56,38 @@ export const config = {
     channels: [
       {
         id: process.env.DISCORD_CHANNEL_ID,  // Main channel
-        name: 'main',
-        // Use default templates
+        name: 'main'
       },
       {
         id: process.env.DISCORD_ANNOUNCEMENTS_ID,
         name: 'announcements'
       }
     ],
-    // Default templates used if channel doesn't specify its own
-    templates: {
-      saleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ Apes on Ape #{tokenId} bought for {price} APE on {marketplace}\n{traits}```\n⇨ [View on Magic Eden]({itemUrl})',
-      wapeSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace}\n{traits}```\n⇨ [View on Magic Eden]({itemUrl})',
-      bulkSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ {count} Apes on Ape bought for {totalPrice} APE on {marketplace} (avg. {avgPrice} APE)```\n⇨ [View on Apescan]({txUrl})',
-      bulkWapeSaleMessage: '```▤▤▤▤▤▤▤▤▤▤▤▤ NEW TX ▤▤▤▤▤▤▤▤▤▤▤▤▤▤ ⇒⇒⇒⇒⇒⇒\n\n◈ {count} Apes on Ape sold for {totalPrice} WAPE on {marketplace} (avg. {avgPrice} WAPE)```\n⇨ [View on Apescan]({txUrl})'
-    }
+    buyMessage: {
+      color: '#0054FA',
+      title: '🚨 **BUY ALERT!** 🚨',
+      description: '🎉 **Apes on Ape #{tokenId}** has been bought for **{price} APE** on **{marketplace}**!\n[View NFT](<{itemUrl}>)',
+    },
+    saleMessage: {
+      color: '#E74C3C',
+      title: '🚨 **SALE ALERT!** 🚨',
+      description: '💸 **Apes on Ape #{tokenId}** has been sold for **{price} WAPE** on **{marketplace}**!\n[View NFT](<{itemUrl}>)',
+    },
+    bulkBuyMessage: {
+      color: '#28A745',
+      title: '🚨 **SWEEP ALERT!** 🚨',
+      description: '🛒 **{count} Apes on Ape NFTs** bought for a total of **{totalPrice} APE**!\n📊 Average price: **{avgPrice} APE** per NFT.\n[View Transaction](<{txUrl}>)',
+      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} APE\n- **Avg Price:** {avgPrice} APE',
+    },
+    bulkSaleMessage: {
+      color: '#FFC107',
+      title: '🚨 **BULK SALE ALERT!** 🚨',
+      description: '📤 **{count} Apes on Ape NFTs** sold for a total of **{totalPrice} WAPE**!\n📊 Average price: **{avgPrice} WAPE** per NFT.\n[View Transaction](<{txUrl}>)',
+      saleDetails: '- **Count:** {count}\n- **Total Price:** {totalPrice} WAPE\n- **Avg Price:** {avgPrice} WAPE',
+    },
+    footerText: 'Apechain - Apes on Ape NFT Bot',
   },
+  
   twitter: {
     saleMessage: 'Apes on Ape #{tokenId} bought for {price} APE on {marketplace} 🦍 {traits}\n\n{itemUrl}',
     wapeSaleMessage: 'Apes on Ape #{tokenId} sold for {price} WAPE on {marketplace} 🦍 {traits}\n\n{itemUrl}',

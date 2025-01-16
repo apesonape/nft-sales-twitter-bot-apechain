@@ -180,23 +180,15 @@ export class MagicEdenSalesService extends BaseService {
 
         // Replace trait placeholders if available
         if (nftTraits?.formattedTraits) {
-          if (templates === this.config.discord.templates) {
-            // For Discord, use the configured placement
-            const placement = this.config.traits.discord.placement;
-            return baseMessage.replace(placement, nftTraits.formattedTraits.discord);
-          } else {
             // For Twitter, replace {traits} directly
             return baseMessage.replace('{traits}', nftTraits.formattedTraits.twitter);
-          }
         }
 
         return baseMessage;
       };
 
-      const discordMessage = createMessage(this.config.discord.templates);
       const twitterMessage = createMessage(this.config.twitter);
 
-      const message = discordMessage;
       if (this.config.debug_mode) {
         console.log('Processing sale:', {
           tokenId: saleData.tokenId,
@@ -239,13 +231,15 @@ export class MagicEdenSalesService extends BaseService {
         itemUrl,
         txUrl,
         imageUrls,
-        message,
-        discordMessage,
         twitterMessage,
         transferCount: saleData.transferCount,
         traits: nftTraits?.traits,
         formattedTraits: nftTraits?.formattedTraits
       } as SaleData);
+
+      if (this.config.debug_mode) {
+        console.log(`Sale processed: ${twitterMessage}`);
+      }
     } catch (error) {
       console.error('Error processing sale:', error);
       // Remove from processed sales if there was an error
