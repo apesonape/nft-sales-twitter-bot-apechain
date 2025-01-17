@@ -1,28 +1,20 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { BaseService } from './base.service';
-import { Client, GatewayIntentBits, TextChannel, BaseGuildTextChannel, GuildTextBasedChannel } from 'discord.js';
-import { DiscordMessageData } from '../types/sale.types';
-
-// Define interfaces for our config types
-interface ChannelTemplates {
-  saleMessage?: string;
-  wapeSaleMessage?: string;
-  bulkSaleMessage?: string;
-  bulkWapeSaleMessage?: string;
-}
-
-interface ChannelConfig {
-  id: string;
-  name: string;
-  templates?: ChannelTemplates;
-}
+import { Client, GatewayIntentBits, GuildTextBasedChannel } from 'discord.js';
+import { createSaleMessage, createBulkBuyMessage, createBuyMessage, createBulkSaleMessage } from './discord-alerts';
+import { MessageType } from '../types/message-types';
+import { SaleData } from 'src/types/sale.types';
+import { config } from '../config';
 
 @Injectable()
 export class DiscordService extends BaseService implements OnModuleInit {
-  private client: Client;
-  private channels: Map<string, GuildTextBasedChannel> = new Map();
-  private ready = false;
+  private client: Client; // Discord client instance
+  private channels: Map<string, GuildTextBasedChannel> = new Map(); // Map of channel names to channel objects
+  private ready = false; // Flag to check if the Discord client is ready
 
+  /**
+   * Constructor initializes the Discord client and sets up event listeners for reconnect and disconnect events.
+   */
   constructor() {
     super();
     console.log('Discord service constructor called');
@@ -53,26 +45,37 @@ export class DiscordService extends BaseService implements OnModuleInit {
     });
   }
 
+  /**
+   * Attempts to reconnect the Discord client if disconnected.
+   */
   private async reconnect() {
     try {
       if (!this.client.isReady()) {
         console.log('Attempting to reconnect Discord client...');
-        await this.client.login(process.env.DISCORD_TOKEN);
-        await this.initializeChannels();
+        await this.client.login(process.env.DISCORD_TOKEN); // Reattempt login
+        await this.initializeChannels(); // Reinitialize channels
         this.ready = true;
         console.log('Discord client successfully reconnected');
       }
     } catch (error) {
       console.error('Error reconnecting Discord client:', error);
-      // Try again in 5 seconds
+      // Retry after 5 seconds
       setTimeout(() => this.reconnect(), 5000);
     }
   }
 
+  /**
+   * Returns the current readiness status of the Discord client.
+   * @returns true if the client is ready, false otherwise.
+   */
   isReady(): boolean {
     return this.ready;
   }
 
+  /**
+   * Initializes the Discord service by logging in the client and setting up channels.
+   * This method is called when the module is initialized.
+   */
   async onModuleInit() {
     console.log('Discord service initializing...');
     try {
@@ -103,7 +106,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
         this.emit('error', error);
       });
 
-      await this.client.login(token);
+      await this.client.login(token); // Login to Discord with the token
       console.log('Discord login successful');
     } catch (error) {
       console.error('Error initializing Discord service:', error);
@@ -111,6 +114,10 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
   }
 
+  /**
+   * Initializes the Discord channels based on the configuration in the environment variables.
+   * This method fetches each channel and stores it in a map for later use.
+   */
   private async initializeChannels() {
     console.log('Initializing Discord channels...');
     try {
@@ -120,6 +127,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
       
       console.log('Discord channels config:', this.config.discord.channels);
       
+      // Iterate over all configured channels
       for (const channelConfig of this.config.discord.channels) {
         if (!channelConfig.id) {
           console.error(`Missing channel ID for channel: ${channelConfig.name}`);
@@ -132,7 +140,7 @@ export class DiscordService extends BaseService implements OnModuleInit {
           
           if (channel) {
             console.log(`Channel fetched successfully: ${channel.name} (${channel.id})`);
-            this.channels.set(channelConfig.name, channel);
+            this.channels.set(channelConfig.name, channel); // Store the channel in the map
             console.log(`Successfully connected to channel: ${channelConfig.name} (${channel.name})`);
             console.log(`Current channels in Map: ${Array.from(this.channels.keys()).join(', ')}`);
           } else {
@@ -153,11 +161,13 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
   }
 
-  private getMessageTemplate(channelConfig: ChannelConfig, templateName: string): string {
-    return channelConfig.templates?.[templateName] || this.config.discord.templates[templateName];
-  }
-
-  async sendMessage(messageData: DiscordMessageData) {
+  /**
+   * Sends a message to the configured Discord channels based on the provided message data.
+   * It handles different message types (buy, sale, bulkBuy, bulkSale) and includes embedded messages with relevant details.
+   * 
+   * @param saleData The data related to the sale.
+   */
+  async sendMessage(saleData: SaleData) {
     if (!this.ready) {
       console.log('Skipping Discord message - client not ready, attempting to reconnect...');
       await this.reconnect();
@@ -168,29 +178,47 @@ export class DiscordService extends BaseService implements OnModuleInit {
     }
 
     try {
-      // Log the message content
-      console.log('\nSending to Discord:', messageData.message);
-      
-      const validImageUrls = messageData.imageUrls.filter(url => url !== null);
-      const files = validImageUrls.map(url => {
-        // Check if URL already has an extension
-        const hasExtension = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-        if (hasExtension) {
-          return { attachment: url }; // Keep original URL if it has an extension
-        }
-        
-        // Default to .jpg if no extension (can be adjusted based on content-type if needed)
-        return { 
-          attachment: url,
-          name: 'nft-image.jpg'
-        };
-      });
+      // Setting up data to create message
+      let messageType: MessageType;
+      messageType = categorizeMessageType(saleData);
 
+      let embed;
+      const { displayTokenId, price, marketplace, itemUrl, count, totalPrice, txUrl, traits } = saleData;
+
+      let nftImg = saleData.imageUrls[0];
+
+      // Conditionally calculate formattedTraits only for Buy and Sale messages
+      let formattedTraits = '';
+      if (messageType === MessageType.Buy || messageType === MessageType.Sale) {
+        formattedTraits = formatTraits(traits); // Use the helper method for traits
+      }
+
+      // Create the appropriate embed based on the message type
+      switch (messageType) {
+        case MessageType.Buy:
+          embed = createBuyMessage(displayTokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
+          break;
+        case MessageType.Sale:
+          embed = createSaleMessage(displayTokenId, price, marketplace, itemUrl, nftImg, formattedTraits);
+          break;
+        case MessageType.BulkBuy:
+          embed = createBulkBuyMessage(count, totalPrice, marketplace, txUrl, nftImg);
+          break;
+        case MessageType.BulkSale:
+          embed = createBulkSaleMessage(count, totalPrice, marketplace, txUrl, nftImg);
+          break;
+        default:
+          console.error('Unknown message type:', messageType);
+          return;
+      }
+
+      console.log('\nSending to Discord:', embed);
+
+      // Iterate over all configured channels and send the message
       for (const [channelName, channel] of this.channels) {
         console.log(`Sending message to channel: ${channelName}`);
         await channel.send({
-          content: messageData.message,
-          files
+          embeds: [embed]
         });
         console.log(`Successfully sent message to channel: ${channelName}`);
       }
@@ -203,4 +231,43 @@ export class DiscordService extends BaseService implements OnModuleInit {
       }
     }
   }
-} 
+}
+
+/**
+ * Helper method to categorize the message type based on sale data.
+ * @param saleData The data related to the sale that determines the message type.
+ * @returns The appropriate message type based on the sale data.
+ */
+function categorizeMessageType(saleData: { isBulkSale: boolean, isWapeSale: boolean }): MessageType {
+  if (saleData.isBulkSale) {
+    // If it's a bulk sale, use bulkSale type
+    return saleData.isWapeSale ? MessageType.BulkSale : MessageType.BulkBuy;
+  } else {
+    // If it's not a bulk sale, check if it's a WAPE sale
+    return saleData.isWapeSale ? MessageType.Sale : MessageType.Buy;
+  }
+}
+
+/**
+ * Formats an array of trait objects into a string suitable for display.
+ * 
+ * - Filters out any trait types specified in the `excludeTraitTypes` array from the config.
+ * - Converts each trait into a formatted string of "Trait Type: Trait Value".
+ * - Joins all the formatted traits with a newline for readability.
+ * 
+ * @param traits - An array of trait objects, each containing a `trait_type` and a `value`.
+ * @returns A string with all traits formatted and joined by newlines, or an empty string if no valid traits are found.
+ */
+function formatTraits(traits: Array<{ trait_type: string, value: string | number }>): string {
+  console.log('Received traits:', traits); // Log the received traits for debugging
+
+  if (!Array.isArray(traits)) {
+    console.error('Traits are not an array or are undefined:', traits);
+    return '';
+  }
+
+  return traits
+    .filter(trait => !config.traits.excludeTraitTypes.includes(trait.trait_type)) // Exclude traits in the excludeTraitTypes array
+    .map(trait => `**${trait.trait_type}:** ${String(trait.value)}`) // Format trait type and value
+    .join(config.traits.discord.separator); // Join with configured separator (defaults to newline)
+}

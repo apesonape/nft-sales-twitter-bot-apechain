@@ -44,10 +44,7 @@ async function bootstrap() {
   // Listen for sale events and send to Discord and Twitter
   salesService.on('sale', async (saleData) => {
     // Always send to Discord
-    await discordService.sendMessage({
-      message: saleData.discordMessage,
-      imageUrls: saleData.imageUrls
-    });
+    await discordService.sendMessage(saleData);
 
     // Conditionally send to Twitter based on filters
     await twitterService.postTweet(saleData);

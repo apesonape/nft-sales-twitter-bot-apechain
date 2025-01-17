@@ -93,112 +93,73 @@ export class TwitterService extends BaseService {
       console.log('Twitter client not initialized, skipping tweet');
       return;
     }
-
+  
     if (!this.shouldTweet(saleData)) {
-      if (this.config.debug_mode) {
-        console.log('Tweet filter check:', {
-          isBulkSale: saleData.isBulkSale,
-          isWapeSale: saleData.isWapeSale,
-          count: saleData.count,
-          price: saleData.price,
-          minBulkCount: this.config.tweetFilters.minBulkPurchaseCount,
-          minPrice: saleData.isWapeSale 
-            ? this.config.tweetFilters.minSingleSalePrice.wape 
-            : this.config.tweetFilters.minSingleSalePrice.ape
-        });
-      }
       console.log('Tweet filtered out based on configuration');
       return;
     }
+  
+    // Format traits for the tweet
+    const formattedTraits = saleData.formattedTraits?.twitter || '';
+  
+    // Prepare the tweet text
+    let tweetText = '';
+    if (saleData.isBulkSale) {
+      tweetText = saleData.isWapeSale
+        ? this.config.twitter.bulkWapeSaleMessage
+        : this.config.twitter.bulkSaleMessage;
+    } else {
+      tweetText = saleData.isWapeSale
+        ? this.config.twitter.wapeSaleMessage
+        : this.config.twitter.saleMessage;
+    }
 
+    const totalPriceNum = parseFloat(saleData.totalPrice);
+    const avgPrice = saleData.count > 0 && !isNaN(totalPriceNum) ? totalPriceNum / saleData.count : 0;
+  
+    // Replace placeholders with actual data
+    tweetText = tweetText
+      .replace('{tokenId}', saleData.tokenId)
+      .replace('{price}', saleData.price)
+      .replace('{marketplace}', saleData.marketplace)
+      .replace('{traits}', formattedTraits)
+      .replace('{itemUrl}', saleData.itemUrl || '')
+      .replace('{count}', saleData.count.toString())
+      .replace('{totalPrice}', saleData.totalPrice.toString())
+      .replace('{avgPrice}', avgPrice.toFixed(2))
+      .replace('{txUrl}', saleData.txUrl || '');
+  
+    // Log tweet text for debugging
+    if (this.config.debug_mode) {
+      console.log('Formatted tweet text:', tweetText);
+    }
+  
     let mediaIds: string[] = [];
     try {
-      // Upload images if available (up to 4)
-      if (saleData.imageUrls && saleData.imageUrls.length > 0) {
-        const validImageUrls = saleData.imageUrls.filter(url => url !== null);
-        
-        if (validImageUrls.length > 0) {
-          if (this.config.debug_mode) {
-            console.log(`Attempting to upload ${Math.min(4, validImageUrls.length)} images to Twitter...`);
-          }
-          
-          const imagesToUpload = validImageUrls.slice(0, 4);
-          
-          for (const imageUrl of imagesToUpload) {
-            try {
-              if (this.config.debug_mode) {
-                console.log(`Downloading image: ${imageUrl}`);
-              }
-              const imageBuffer = await this.downloadImage(imageUrl);
-              
-              if (this.config.debug_mode) {
-                console.log('Successfully downloaded image, uploading to Twitter...');
-              }
-              
-              const mediaId = await this.client.v1.uploadMedia(imageBuffer, { mimeType: 'image/webp' });
-              if (this.config.debug_mode) {
-                console.log(`Successfully uploaded image, received media ID: ${mediaId}`);
-              }
-              mediaIds.push(mediaId);
-            } catch (uploadError) {
-              console.error('Failed to upload image to Twitter');
-              if (this.config.debug_mode) {
-                console.error('Upload error details:', uploadError);
-                if (uploadError.data?.errors) {
-                  console.error('Twitter API errors:', uploadError.data.errors);
-                }
-              }
-            }
-          }
-          
-          if (this.config.debug_mode) {
-            console.log(`Successfully uploaded ${mediaIds.length} out of ${imagesToUpload.length} images`);
+      if (saleData.imageUrls?.length > 0) {
+        const imagesToUpload = saleData.imageUrls.slice(0, 4);
+        for (const imageUrl of imagesToUpload) {
+          try {
+            const imageBuffer = await this.downloadImage(imageUrl);
+            const mediaId = await this.client.v1.uploadMedia(imageBuffer, { mimeType: 'image/webp' });
+            mediaIds.push(mediaId);
+          } catch (uploadError) {
+            console.error('Failed to upload image:', uploadError);
           }
         }
       }
-
+  
       const tweetData: any = {
-        text: saleData.twitterMessage,
-        ...(mediaIds.length > 0 && { media: { media_ids: mediaIds } })
+        text: tweetText,
+        ...(mediaIds.length > 0 && { media: { media_ids: mediaIds } }),
       };
-
-      if (this.config.debug_mode) {
-        console.log('Sending tweet with data:', JSON.stringify(tweetData, null, 2));
-      }
-
+  
       const tweet = await this.client.v2.tweet(tweetData);
-      console.log(`Tweet sent: ${saleData.twitterMessage}`);
-      
-      if (this.config.debug_mode) {
-        console.log('Tweet ID:', tweet.data.id);
-      }
+      console.log(`Tweet sent: ${tweetText}`);
     } catch (error) {
-      if (error.code === 429) {
-        const dayLimit = error.rateLimit?.day;
-        if (dayLimit) {
-          console.error(`Twitter rate limit reached - Daily limit: ${dayLimit.limit}, Reset in: ${Math.round((dayLimit.reset - Date.now()/1000)/3600)} hours`);
-        } else {
-          console.error('Twitter rate limit reached');
-        }
-      } else {
-        console.error('Failed to send tweet');
-      }
-
-      if (this.config.debug_mode) {
-        console.error('Error details:', error);
-        if (error.data?.errors) {
-          console.error('Twitter API errors:', error.data.errors);
-        }
-        if (error.errors) {
-          console.error('Twitter API errors:', error.errors);
-        }
-        console.error('Tweet data that failed:', {
-          text: saleData.twitterMessage,
-          mediaCount: mediaIds.length
-        });
-      }
+      console.error('Failed to send tweet:', error);
     }
-  }
+  }  
 
   async generateAuthUrl() {
     if (!process.env.TWITTER_API_KEY || !process.env.TWITTER_API_SECRET) {
@@ -264,3 +225,4 @@ export class TwitterService extends BaseService {
     }
   }
 } 
+
