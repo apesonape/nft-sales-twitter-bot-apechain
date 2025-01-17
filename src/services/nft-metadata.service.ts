@@ -273,4 +273,35 @@ export class NFTMetadataService extends BaseService {
       twitter: twitterResult
     };
   }
+
+  private formatTraitsForTwitter(traits: { trait_type: string; value: string | number }[]): string {
+    const { twitter } = this.config.traits;
+    const maxTraits = twitter.maxTraits;
+    const maxChars = twitter.maxCharacters;
+
+    // Start with all traits up to maxTraits
+    let selectedTraits = traits.slice(0, maxTraits);
+    let formattedText = selectedTraits.map(trait =>
+      twitter.format
+        .replace('{trait_type}', trait.trait_type)
+        .replace('{value}', trait.value.toString())
+    ).join(twitter.separator);
+
+    // If text is too long, remove traits one by one until it fits
+    while (formattedText.length > maxChars && selectedTraits.length > 0) {
+      selectedTraits.pop();
+      formattedText = selectedTraits.map(trait =>
+        twitter.format
+          .replace('{trait_type}', trait.trait_type)
+          .replace('{value}', trait.value.toString())
+      ).join(twitter.separator);
+    }
+
+    // Add truncation indicator if we removed any traits
+    if (selectedTraits.length < traits.length) {
+      formattedText += '...';
+    }
+
+    return formattedText;
+  }
 } 
