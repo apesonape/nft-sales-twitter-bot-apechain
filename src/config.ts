@@ -94,5 +94,5 @@ export const config = {
     skipBulkWapeSales: false,
   },
   
-  debug_mode: true
+  debug_mode: false
 }; 
