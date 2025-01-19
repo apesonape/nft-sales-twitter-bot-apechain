@@ -30,6 +30,15 @@ export class MagicEdenSalesService extends BaseService {
     );
 
     nftContract.on("Transfer", async (from, to, tokenId, event) => {
+      if (this.config.debug_mode) {
+        console.log(`Transfer event detected:
+          - From: ${from}
+          - To: ${to}
+          - Token ID: ${tokenId}
+          - TX Hash: ${event.transactionHash}
+        `);
+      }
+      
       const tx = await event.getTransaction();
       
       // Consider it a sale if:
@@ -43,6 +52,15 @@ export class MagicEdenSalesService extends BaseService {
           !tx.value.isZero() || 
           tx.to?.toLowerCase() === '0x224ecB4Eae96d31372D1090c3B0233C8310dBbaB'.toLowerCase()
         );
+
+      if (this.config.debug_mode) {
+        console.log(`Sale detection for ${event.transactionHash}:
+          - Is ME Address: ${this.ME_ADDRESSES.some(addr => tx.to?.toLowerCase() === addr.toLowerCase())}
+          - Has Value: ${!tx.value.isZero()}
+          - Is Bid Accept: ${tx.to?.toLowerCase() === '0x224ecB4Eae96d31372D1090c3B0233C8310dBbaB'.toLowerCase()}
+          - Final isMESale: ${isMESale}
+        `);
+      }
 
       if (isMESale) {
         try {
@@ -61,6 +79,13 @@ export class MagicEdenSalesService extends BaseService {
 
           const transferCount = uniqueTokenIds.size;
 
+          if (this.config.debug_mode) {
+            console.log(`Transfer details for ${event.transactionHash}:
+              - Total transfers: ${transferCount}
+              - Token IDs: ${Array.from(uniqueTokenIds).join(', ')}
+            `);
+          }
+
           // Get price - check for both APE and WAPE
           let price = tx.value;  // Direct APE value
           if (price.isZero() && tx.to?.toLowerCase() === '0x224ecB4Eae96d31372D1090c3B0233C8310dBbaB'.toLowerCase()) {
@@ -73,8 +98,18 @@ export class MagicEdenSalesService extends BaseService {
                 const hasValue = log.data && log.data !== '0x';
                 const isERC20Transfer = topics.length === 3;
                 
+                if (this.config.debug_mode) {
+                  console.log(`WAPE transfer check for log:
+                    - Is Transfer: ${isTransfer}
+                    - Has Value: ${hasValue}
+                    - Is ERC20: ${isERC20Transfer}
+                    - Data: ${log.data}
+                  `);
+                }
+                
                 return isTransfer && isERC20Transfer && hasValue;
               } catch (e) {
+                console.error('Error checking WAPE transfer:', e);
                 return false;
               }
             });
@@ -89,11 +124,12 @@ export class MagicEdenSalesService extends BaseService {
 
               price = ethers.BigNumber.from(sortedTransfers[0].data);
               
-              if (this.config?.debug_mode === true) {
-                console.log('WAPE Transfer logs:', wapeTransfers.map(log => ({
-                  data: log.data,
-                  topics: log.topics
-                })));
+              if (this.config.debug_mode) {
+                console.log(`WAPE price calculation for ${event.transactionHash}:
+                  - Total transfers found: ${wapeTransfers.length}
+                  - Selected price (wei): ${price.toString()}
+                  - All transfer values: ${wapeTransfers.map(log => ethers.BigNumber.from(log.data).toString()).join(', ')}
+                `);
               }
             }
           }
@@ -113,6 +149,17 @@ export class MagicEdenSalesService extends BaseService {
               totalPrice : 
               (parseFloat(totalPrice) / transferCount).toString();
 
+            if (this.config.debug_mode) {
+              console.log(`Price calculations for ${event.transactionHash}:
+                - Raw price (wei): ${price.toString()}
+                - Total price (APE): ${totalPrice}
+                - Is WAPE sale: ${isWapeSale}
+                - Transfer count: ${transferCount}
+                - Adjusted total: ${adjustedTotalPrice}
+                - Price per NFT: ${pricePerNFT}
+              `);
+            }
+
             const tokenId = Array.from(uniqueTokenIds)[0];
             if (!tokenId) {
               console.error('No token ID found in transfer');
@@ -130,6 +177,8 @@ export class MagicEdenSalesService extends BaseService {
             };
 
             await this.processSale(saleData);
+          } else if (this.config.debug_mode) {
+            console.log(`Skipping sale ${event.transactionHash} - zero price detected`);
           }
         } catch (error) {
           console.error('Error processing sale:', error);
@@ -289,16 +338,23 @@ export class MagicEdenSalesService extends BaseService {
   private async getNFTImages(saleData: any): Promise<string[]> {
     try {
       if (saleData.transferCount > 1) {
-        // Get token IDs from transfer events
+        // Get all token IDs from transfer events (useful for future database logging)
         const receipt = await this.getTransactionReceipt(saleData.transactionHash);
-        const uniqueTokenIds = Array.from(new Set<string>(
+        const allTokenIds = Array.from(new Set<string>(
           receipt.logs
             .filter(log => log.address.toLowerCase() === this.config.contract_address.toLowerCase())
             .map(log => ethers.BigNumber.from(log.topics[3]).toString())
-        )).slice(0, 4); // Get up to 4 unique images
+        ));
+
+        // Only fetch images for the first 4 tokens in bulk sales
+        const tokensForImages = allTokenIds.slice(0, 4);
+        
+        if (this.config.debug_mode) {
+          console.log(`Bulk sale detected: ${allTokenIds.length} total tokens, fetching images for first ${tokensForImages.length}`);
+        }
 
         return await Promise.all(
-          uniqueTokenIds.map(id => this.metadataService.getImageUrl(this.config.contract_address, id))
+          tokensForImages.map(id => this.metadataService.getImageUrl(this.config.contract_address, id))
         );
       } else {
         const imageUrl = await this.metadataService.getImageUrl(
